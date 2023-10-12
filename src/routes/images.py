@@ -10,7 +10,7 @@ router = APIRouter()
 @router.post("/images/")
 async def create_image(
     image: ImageCreate,
-    file: UploadFile = File(None),
+    file: UploadFile = File(),
     db: Session = Depends(get_db)
 ):
     # Створення нового запису Image

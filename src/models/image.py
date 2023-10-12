@@ -23,7 +23,7 @@ class ImageCreate(BaseModel):
     description: str
     image_url: str
 
-# Клас ImageFileCreate є допоміжним та використовується для операцій з файлами
+# # Клас ImageFileCreate є допоміжним та використовується для операцій з файлами
 
 
 class ImageFileCreate(BaseModel):
