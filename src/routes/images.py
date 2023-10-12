@@ -10,16 +10,17 @@ router = APIRouter()
 @router.post("/images/")
 async def create_image(
     image: ImageCreate,
-    file: UploadFile = File(None),  # Додаю завантаження файлу
+    file: UploadFile = File(None),
     db: Session = Depends(get_db)
 ):
+    # Створення нового запису Image
     db_image = Image(**image.dict())
     db.add(db_image)
     db.commit()
     db.refresh(db_image)
 
     if file:
-        # Зберегти завантажений файл
+        # Збереження завантаженого файлу
         file_path = save_upload_file(file, db_image.id)
         db_image.image_url = file_path
         db.commit()
@@ -29,6 +30,7 @@ async def create_image(
 
 @router.get("/images/{image_id}")
 async def read_image(image_id: int, db: Session = Depends(get_db)):
+    # Отримання інформації про Image за ідентифікатором
     image = db.query(Image).filter(Image.id == image_id).first()
     if image is None:
         raise HTTPException(status_code=404, detail="Image not found")
@@ -37,6 +39,7 @@ async def read_image(image_id: int, db: Session = Depends(get_db)):
 
 @router.put("/images/{image_id}")
 async def update_image(image_id: int, image: ImageCreate, db: Session = Depends(get_db)):
+    # Оновлення інформації про Image за ідентифікатором
     db_image = db.query(Image).filter(Image.id == image_id).first()
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found")
@@ -49,19 +52,15 @@ async def update_image(image_id: int, image: ImageCreate, db: Session = Depends(
 
 @router.delete("/images/{image_id}")
 async def delete_image(image_id: int, db: Session = Depends(get_db)):
+    # Видалення запису Image за ідентифікатором
     db_image = db.query(Image).filter(Image.id == image_id).first()
     if db_image is None:
         raise HTTPException(status_code=404, detail="Image not found")
 
-    # Додаю видалення файлу, якщо він прив'язаний до запису
-    # if db_image.image_url:
-        # delete_upload_file(db_image.image_url)
-
+    # Додавання логіки для видалення файлу, якщо він пов'язаний з Image
     db.delete(db_image)
     db.commit()
     return {"message": "Image deleted"}
-
-# Новий роутер для завантаження файлів
 
 
 @router.post("/files/", response_model=ImageFile)
@@ -69,10 +68,8 @@ async def upload_file(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
+    # Завантаження файлу та створення запису в базі даних
     file_path = save_upload_file(file)
-
-    # Створимо запис для файлу в базі даних
     image_file = ImageFileCreate(description=file.filename)
     image_file.file_path = file_path
-
     return image_file
