@@ -3,13 +3,12 @@ import uvicorn
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from src.database.db import get_db
-from src.models.image import Image, ImageCreate  # Імпорт моделі для зображень
-from src.routes.images import router  # Імпорт маршрутів для зображень
+from src.models.image import Image, ImageCreate
+from src.routes.images import router
 
 app = FastAPI()
 
 
-# default route for the application
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to Photoshare"}
@@ -28,8 +27,6 @@ async def healthchecker(db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=500, detail="Error connecting to the database")
 
-
-# Підключення маршрутів для роботи з зображеннями
 app.include_router(router)
 
 if __name__ == "__main__":
