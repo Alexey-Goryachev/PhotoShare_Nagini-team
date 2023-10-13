@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.sqltypes import Enum
+from pydantic import BaseModel
+from typing import List
 
 Base = declarative_base()
 
@@ -14,3 +16,4 @@ class User(Base):
     password = Column(String(255), nullable=False)
     roles = Column(Enum("User", "Moderator", "Administrator", name="user_roles"), default="User")
     created_at = Column('created_at', DateTime, default=func.now())
+
