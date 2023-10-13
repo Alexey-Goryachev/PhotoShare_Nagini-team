@@ -46,12 +46,13 @@ class PhotoBase(BaseModel):
 
 
 class PhotoCreate(BaseModel):
-    image_url: str  # Змініть назву поля, якщо це буде URL до зображення
     description: str
-    image: UploadFile  # Додайте поле для завантаження файлу
+    image: UploadFile
 
 
 class PhotoUpdate(PhotoBase):
+    # title: str = Field(max_length=45)
+    # description: str = Field(max_length=450)
     pass
 
 
@@ -64,3 +65,4 @@ class PhotoResponse(BaseModel):
 
 class PhotoListResponse(BaseModel):
     photos: List[PhotoResponse]
+

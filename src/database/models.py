@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.sqltypes import Enum
 from fastapi import File, UploadFile
 from typing import List
-from src.schemas import PhotoBase
+
 
 
 Base = declarative_base()
@@ -39,10 +39,3 @@ class Photo(Base):
     # Зв'язок з користувачем
     user = relationship("User", back_populates="photos")
 
-
-class PhotoCreate(PhotoBase):
-    image: UploadFile  # Додаю поле для завантаження файлу
-
-
-class PhotoUpdate(PhotoBase):
-    image: UploadFile  # Додаю поле для завантаження файлу
