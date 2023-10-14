@@ -2,12 +2,12 @@ import uvicorn
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from src.routes.auth import router
+from src.routes.auth import router as auth_router
 from src.database.db import get_db
 
 app = FastAPI()
 
-app.include_router(router, prefix='/api')
+app.include_router(auth_router)
 
 
 

@@ -11,17 +11,17 @@ router = APIRouter(prefix='/auth', tags=["auth"])
 security = HTTPBearer()
 
 #Реєстрація
-@router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/auth/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(body: UserModel, db: Session = Depends(get_db)):
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if "@" not in body.email:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email")
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email")
 
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
     if body.roles[0] not in ["User", "Moderator", "Administrator"]:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid role")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Invalid role")
     body.roles = ",".join(body.roles)
     body.password = auth_service.get_password_hash(body.password)
     new_user = await repository_users.create_user(body, db)
@@ -29,7 +29,7 @@ async def signup(body: UserModel, db: Session = Depends(get_db)):
 
 
 #Логін
-@router.post("/login", response_model=TokenModel)
+@router.post("/auth/login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = await repository_users.get_user_by_email(body.username, db)
     if user is None:
