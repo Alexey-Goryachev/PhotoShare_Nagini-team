@@ -50,10 +50,8 @@ class PhotoCreate(BaseModel):
     image: UploadFile
 
 
-class PhotoUpdate(PhotoBase):
-    # title: str = Field(max_length=45)
-    # description: str = Field(max_length=450)
-    pass
+class PhotoUpdate(BaseModel):
+    description: str
 
 
 class PhotoResponse(BaseModel):
@@ -65,4 +63,3 @@ class PhotoResponse(BaseModel):
 
 class PhotoListResponse(BaseModel):
     photos: List[PhotoResponse]
-

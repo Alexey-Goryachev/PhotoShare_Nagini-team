@@ -1,5 +1,4 @@
 from src.schemas import PhotoResponse
-from src.schemas import PhotoResponse  # Імпортуйте потрібний тип
 from sqlalchemy.orm import Session
 from src.database.models import Photo
 from src.schemas import PhotoCreate, PhotoUpdate
@@ -59,8 +58,9 @@ async def get_photo_by_id(photo_id: int, db: Session):
 async def update_photo(photo_id: int, updated_photo: PhotoUpdate, db: Session):
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if photo:
-        for key, value in updated_photo.dict().items():
-            setattr(photo, key, value)
+        # Перевірка, чи в `updated_photo` є значення для `description`
+        if updated_photo.description is not None:
+            photo.description = updated_photo.description
         db.commit()
         return PhotoResponse(id=photo.id, image_url=photo.image_url, description=photo.description, created_at=photo.created_at)
 

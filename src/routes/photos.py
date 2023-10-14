@@ -5,7 +5,8 @@ from src.database.db import get_db
 from src.schemas import PhotoCreate, PhotoResponse, PhotoListResponse, PhotoUpdate
 from src.repository import photos as repository_photos
 from src.database.db import SessionLocal
-from src.repository.photos import get_all_photos  # Імпортуйте цю функцію
+from src.repository.photos import get_all_photos
+from starlette.responses import JSONResponse
 
 
 router = APIRouter(prefix="/photos", tags=["photos"])
@@ -57,8 +58,7 @@ async def delete_photo(
     photo_id: int,
     db: Session = Depends(get_db)
 ):
-    photo = await repository_photos.delete_photo(photo_id, db)
-    if not photo:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Фото не знайдено")
-    return photo
+    result = await repository_photos.delete_photo(photo_id, db)
+    if result is None:
+        return JSONResponse(status_code=204)
+    return result
