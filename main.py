@@ -4,7 +4,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from src.routes.auth import router as auth_router
 from src.routes.photos import router as photos_router
-from src.authentication.app import app as fastapi_app
+
 from src.database.db import get_db
 
 app = FastAPI()
@@ -13,6 +13,8 @@ app.include_router(auth_router, prefix='/api')
 app.include_router(photos_router, prefix='/api')
 
 # default route for the application
+app.include_router(auth_router)
+
 
 
 @app.get("/")

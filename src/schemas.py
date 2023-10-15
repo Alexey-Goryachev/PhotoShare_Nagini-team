@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import List
 from enum import Enum
-from pydantic import BaseModel
 from fastapi import UploadFile
-
+from pydantic import BaseModel, EmailStr
 
 class Role(str, Enum):
     User = "User"
@@ -13,7 +12,7 @@ class Role(str, Enum):
 
 class UserModel(BaseModel):
     username: str
-    email: str
+    email: EmailStr
     password: str
     roles: List[str] = ["User"]
 
@@ -21,7 +20,7 @@ class UserModel(BaseModel):
 class UserDb(BaseModel):
     id: int
     username: str
-    email: str
+    email: EmailStr
     created_at: datetime
 
     class Config:
