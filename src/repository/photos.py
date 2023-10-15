@@ -69,6 +69,5 @@ async def delete_photo(photo_id: int, db: Session):
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if photo:
         db.delete(photo)
-        db.commit()
-        return None
-    return None
+        db.commit()    
+    return photo

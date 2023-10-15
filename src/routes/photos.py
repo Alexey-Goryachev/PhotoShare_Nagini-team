@@ -60,5 +60,5 @@ async def delete_photo(
 ):
     result = await repository_photos.delete_photo(photo_id, db)
     if result is None:
-        return JSONResponse(status_code=204)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
     return result
