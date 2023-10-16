@@ -4,6 +4,7 @@ from enum import Enum
 from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr
 
+
 class Role(str, Enum):
     User = "User"
     Moderator = "Moderator"
@@ -46,7 +47,6 @@ class PhotoBase(BaseModel):
 
 class PhotoCreate(BaseModel):
     description: str
-    image: UploadFile
 
 
 class PhotoUpdate(BaseModel):
