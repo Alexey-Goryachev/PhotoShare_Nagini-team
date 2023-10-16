@@ -1,6 +1,5 @@
 from src.schemas import PhotoResponse
 from sqlalchemy.orm import Session
-from src.database.models import Photo
 from src.schemas import PhotoCreate, PhotoUpdate
 from fastapi import UploadFile
 from src.utils import upload_file
