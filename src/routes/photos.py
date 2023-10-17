@@ -7,11 +7,11 @@ from src.repository import photos as repository_photos
 from src.database.db import SessionLocal
 from src.repository.photos import get_all_photos
 from starlette.responses import JSONResponse
-from src.database.models import Photo
+from src.database.models import Photo, User
 from src.repository import photos as repository_photos
 from src.schemas import PhotoTransform, TransformBodyModel, PhotoLinkTransform
 from src.services.photos import transform_image, create_link_transform_image
-
+from src.authentication.auth import get_current_user
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 
@@ -93,4 +93,4 @@ async def create_link_for_image_transformation(photo_id: int, db: Session=Depend
     result = await create_link_transform_image(photo_id, db)
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
-    return {"image_transform": result}
+    return result

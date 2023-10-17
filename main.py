@@ -13,7 +13,7 @@ app.include_router(auth_router, prefix='/api')
 app.include_router(photos_router, prefix='/api')
 
 # default route for the application
-app.include_router(auth_router)
+# app.include_router(auth_router)
 
 
 

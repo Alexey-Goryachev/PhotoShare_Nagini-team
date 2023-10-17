@@ -6,7 +6,9 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 from src.conf.config import settings
-
+import qrcode
+from PIL import Image
+from io import BytesIO
 
 async def transform_image(photo_id: int, body: TransformBodyModel, db: Session) -> Photo | None:
     cloudinary.config(
@@ -16,7 +18,7 @@ async def transform_image(photo_id: int, body: TransformBodyModel, db: Session) 
         secure=True
     )
     
-    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    photo = db.query(Photo).filter((Photo.id == photo_id)).first()
     if photo:
         transformation = []
         
@@ -69,6 +71,30 @@ async def transform_image(photo_id: int, body: TransformBodyModel, db: Session) 
             return photo
         
 async def create_link_transform_image(photo_id: int, db: Session) -> str | None:
+    cloudinary.config(
+        cloud_name=settings.cloudinary_name,
+        api_key=settings.cloudinary_api_key,
+        api_secret=settings.cloudinary_api_secret,
+        secure=True
+    )
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if photo:
-        return photo.image_transform 
+        qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+        qr.add_data(photo.image_transform)
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="black", back_color="white")
+
+        img_bytes = BytesIO()
+        qr_img.save(img_bytes, format="PNG")
+        img_bytes.seek(0)
+        
+        qr = cloudinary.uploader.upload(img_bytes, public_id=photo.public_id+'_qr', folder="PhotoshareApp_tr")
+        qr_url = cloudinary.CloudinaryImage("PhotoshareApp_tr/"+photo.public_id+'_qr', format="png").build_url(width=250, height=250, crop='fill', version=qr.get('version'))
+        photo.qr_transform = qr_url
+        db.commit()
+        return {"image_transform": photo.image_transform, "qr_transform": photo.qr_transform}

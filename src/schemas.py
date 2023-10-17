@@ -83,7 +83,7 @@ class PhotoTransform(BaseModel):
 
 class PhotoLinkTransform(BaseModel):
     image_transform: str
-    # qr_transform: str
+    qr_transform: str
 
 class TransformCircleModel(BaseModel):
     use_filter: bool = False
