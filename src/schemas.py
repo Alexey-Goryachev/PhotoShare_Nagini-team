@@ -81,6 +81,10 @@ class PhotoTransform(BaseModel):
     # qr_transform: str
     detail: str = "Image successfully transform"
 
+class PhotoLinkTransform(BaseModel):
+    image_transform: str
+    # qr_transform: str
+
 class TransformCircleModel(BaseModel):
     use_filter: bool = False
     height: int = Field(ge=0, default=400)

@@ -64,9 +64,11 @@ async def transform_image(photo_id: int, body: TransformBodyModel, db: Session) 
             cloudinary.uploader.upload(trans_image, public_id=photo.public_id, folder="PhotoshareApp_tr")
             photo.image_transform = trans_image
             db.commit()
-        return photo.image_transform
-    
-# async def create_link_transform_image(image_id: int, db: Session) -> str | None:
-#     image = db.query(Image).filter(Image.id == image_id).first()
-#     if image:
-#         return image.image_transform 
+            return photo.image_transform
+        else:
+            return photo
+        
+async def create_link_transform_image(photo_id: int, db: Session) -> str | None:
+    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+    if photo:
+        return photo.image_transform 

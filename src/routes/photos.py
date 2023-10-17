@@ -9,8 +9,8 @@ from src.repository.photos import get_all_photos
 from starlette.responses import JSONResponse
 from src.database.models import Photo
 from src.repository import photos as repository_photos
-from src.schemas import PhotoTransform, TransformBodyModel#, ImageModel
-from src.services.photos import transform_image #create_link_transform_image
+from src.schemas import PhotoTransform, TransformBodyModel, PhotoLinkTransform
+from src.services.photos import transform_image, create_link_transform_image
 
 
 router = APIRouter(prefix="/photos", tags=["photos"])
@@ -84,4 +84,13 @@ async def photo_transformation(photo_id: int, body: TransformBodyModel, db: Sess
     photo = await transform_image(photo_id, body, db)
     if photo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+    if isinstance(photo, Photo):
+        raise HTTPException(status_code=status.HTTP_200_OK, detail="You don't choose type transformation")
     return {"id": photo_id, "image_transform": photo,  "detail": "Your image successfully transform"}
+
+@router.post('/create_link_for_transformation', response_model=PhotoLinkTransform)
+async def create_link_for_image_transformation(photo_id: int, db: Session=Depends(get_db)):
+    result = await create_link_transform_image(photo_id, db)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Image not found")
+    return {"image_transform": result}
