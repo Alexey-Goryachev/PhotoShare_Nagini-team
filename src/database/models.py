@@ -38,5 +38,3 @@ class Photo(Base):
 
     # Зв'язок з користувачем
     user = relationship("User", back_populates="photos")
-
-    

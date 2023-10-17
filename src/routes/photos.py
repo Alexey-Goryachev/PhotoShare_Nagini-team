@@ -7,6 +7,8 @@ from src.repository import photos as repository_photos
 from src.database.db import SessionLocal
 from src.repository.photos import get_all_photos
 from starlette.responses import JSONResponse
+from src.database.models import Photo
+from src.repository import photos as repository_photos
 
 
 router = APIRouter(prefix="/photos", tags=["photos"])
@@ -16,9 +18,11 @@ router = APIRouter(prefix="/photos", tags=["photos"])
 async def create_photo(
     image: UploadFile = File(...),
     description: str = Form(...),
+
     db: Session = Depends(get_db)
 ):
-    return await repository_photos.create_photo(PhotoCreate(description=description, image=image), db)
+    photo_data = PhotoCreate(description=description)
+    return repository_photos.create_photo(photo_data, image, db)
 
 
 @router.get("/photos/", response_model=PhotoListResponse)
@@ -60,5 +64,15 @@ async def delete_photo(
 ):
     result = await repository_photos.delete_photo(photo_id, db)
     if result is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contact not found")
-    return result
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found")
+
+    # Створено словник, який відповідає моделі PhotoResponse
+    response_data = {
+        "id": result.id,
+        "image_url": result.image_url,
+        "description": result.description,
+        "created_at": result.created_at
+    }
+
+    return response_data
