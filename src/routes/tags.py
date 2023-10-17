@@ -149,7 +149,7 @@ async def remove_tag(tag_id: int,
     return tag
 
 
-@router.get("/new/{photos_id}", response_model=TagToPhotosResponse)
+@router.post("/new/{photos_id}", response_model=TagToPhotosResponse)
 async def add_tag_to_photos(photos_id: int,
                             tag_id: int,
                             db: Session = Depends(get_db)
@@ -167,4 +167,5 @@ async def add_tag_to_photos(photos_id: int,
     :return: A comment object, which is then serialized as json
     """
     result = await repository_tags.add_tag_to_photos(photos_id, tag_id, db)
+    print(result)
     return result

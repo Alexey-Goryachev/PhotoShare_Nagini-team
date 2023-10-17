@@ -114,9 +114,9 @@ class TagResponse(TagBase):
 
 
 class TagToPhotosResponse(BaseModel):
-    id: int
-    photo_id: int
-    tag_id: int
+    id: int | None = 0
+    photo_id: int | None = 0
+    tag_id: int | None = 0
 
     class Config:
         orm_mode = True
