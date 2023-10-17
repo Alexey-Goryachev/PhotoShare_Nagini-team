@@ -20,9 +20,7 @@ class User(Base):
     roles = Column(Enum("User", "Moderator", "Administrator",
                    name="user_roles"), default="User")
     created_at = Column('created_at', DateTime, default=func.now())
-
-
-# відносини для фотографій і користувача
+    # відносини для фотографій і користувача
     photos = relationship("Photo", back_populates="user")
 
 
@@ -34,7 +32,9 @@ class Photo(Base):
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now())
     # Зовнішній ключ для зв'язку з користувачем
-    user_id = Column(Integer, ForeignKey("users.id"))
-
+    user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), default=None)
     # Зв'язок з користувачем
     user = relationship("User", back_populates="photos")
+    image_transform = Column(String(200), nullable=True)
+    qr_transform = Column(String(200), nullable=True)
+    public_id = Column(String(100), nullable=True)
