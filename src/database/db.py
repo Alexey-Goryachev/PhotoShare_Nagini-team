@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 # POSTGRES_USER=postgres
 # POSTGRES_PASSWORD=123456
 # POSTGRES_PORT=5432
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://postgres:123456@localhost:5432/photoshare"
+SQLALCHEMY_DATABASE_URL = 'postgresql+psycopg2://postgres:123456@localhost:5432/photoshare_6'
 
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
