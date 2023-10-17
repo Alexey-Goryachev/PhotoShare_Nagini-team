@@ -103,20 +103,10 @@ class TagModel(TagBase):
     class Config:
         orm_mode = True
 
-
 class TagResponse(TagBase):
     id: int
     # user_id: int
     created_at: datetime
-
-    class Config:
-        orm_mode = True
-
-
-class TagToPhotosResponse(BaseModel):
-    id: int | None = 0
-    photo_id: int | None = 0
-    tag_id: int | None = 0
 
     class Config:
         orm_mode = True
