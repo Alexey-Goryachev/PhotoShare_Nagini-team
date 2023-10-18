@@ -1,3 +1,4 @@
+from sqlalchemy import Column, Integer, String, Boolean, func, Table, UniqueConstraint, ForeignKey, LargeBinary
 from sqlalchemy import Column, Integer, String, Boolean, func, Table, UniqueConstraint, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
@@ -50,9 +51,11 @@ class Photo(Base):
     updated_at = Column(DateTime, default=func.now())
     # Зовнішній ключ для зв'язку з користувачем
     user_id = Column(Integer, ForeignKey("users.id", ondelete='CASCADE'), default=None)
-
     # Зв'язок з користувачем
     user = relationship("User", back_populates="photos")
+    image_transform = Column(String(200), nullable=True)
+    qr_transform = Column(String(200), nullable=True)
+    public_id = Column(String(100), nullable=True)
 
 
 class Comment(Base):

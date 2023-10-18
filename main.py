@@ -18,6 +18,8 @@ app = FastAPI()
 # Конфігурація OAuth2 для Swagger
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
+# default route for the application
+# app.include_router(auth_router)
 app.include_router(auth_router, prefix='/api')
 app.include_router(photos_router, prefix='/api')
 app.include_router(comment_router, prefix='/api')

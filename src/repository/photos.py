@@ -13,24 +13,27 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from faker import Faker
 from cloudinary.uploader import destroy
+from src.conf.config import settings
 
 
-cloudinary.config(
-    cloud_name="dpqnfhenr",
-    api_key="679423711358256",
-    api_secret="qWDJar70AfWF-iGLiKw64EOPxKI"
-)
+# cloudinary.config(
+#     cloud_name="dpqnfhenr",
+#     api_key="679423711358256",
+#     api_secret="qWDJar70AfWF-iGLiKw64EOPxKI"
+# )
 
 
 def init_cloudinary():
     cloudinary.config(
-        cloud_name="dpqnfhenr",
-        api_key="679423711358256",
-        api_secret="qWDJar70AfWF-iGLiKw64EOPxKI"
+        cloud_name=settings.cloudinary_name,
+        api_key=settings.cloudinary_api_key,
+        api_secret=settings.cloudinary_api_secret,
+        secure=True
     )
 
 
 def create_photo(photo: PhotoCreate, image: UploadFile, db: Session) -> PhotoResponse:
+    init_cloudinary()
     public_id = Faker().first_name()
 
     # Отримати байтові дані з об'єкта UploadFile
@@ -43,6 +46,7 @@ def create_photo(photo: PhotoCreate, image: UploadFile, db: Session) -> PhotoRes
     # Створити об'єкт фотографії для збереження в базі даних
     photo_data = photo.dict()
     photo_data["image_url"] = image_url
+    photo_data["public_id"] = public_id
     db_photo = Photo(**photo_data)
 
     # Зберегти фотографію в базі даних
@@ -52,7 +56,7 @@ def create_photo(photo: PhotoCreate, image: UploadFile, db: Session) -> PhotoRes
 
     photo_response_data = db_photo.__dict__
     photo_response_data.pop("_sa_instance_state", None)
-
+    print(photo_response_data)
     return PhotoResponse(**photo_response_data)
 
 
@@ -107,7 +111,9 @@ async def delete_photo(photo_id: int, db: Session):
     if photo:
         # Видалення фотографії з Cloudinary за її public_id
         public_id = get_public_id_from_image_url(photo.image_url)
+        public_id_tr = get_public_id_from_image_url(photo.image_transform)
         destroy(public_id)
+        destroy("PhotoshareApp_tr/" + public_id_tr)
 
         db.delete(photo)
         db.commit()
