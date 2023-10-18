@@ -3,6 +3,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.sqltypes import Enum
+from fastapi import File, UploadFile
+from typing import List
+from pydantic import BaseModel
+
 
 Base = declarative_base()
 
@@ -13,8 +17,10 @@ class User(Base):
     username = Column(String(50))
     email = Column(String(250), nullable=False, unique=True)
     password = Column(String(255), nullable=False)
-    roles = Column(Enum("User", "Moderator", "Administrator", name="user_roles"), default="User")
+    roles = Column(Enum("User", "Moderator", "Administrator",
+                   name="user_roles"), default="User")
     created_at = Column('created_at', DateTime, default=func.now())
+    is_active = Column(Boolean, default=True)
 
     # відносини для фотографій і користувача
     photos = relationship("Photo", back_populates="user")
@@ -26,6 +32,12 @@ photo_2_tag = Table("photo_2_tag", Base.metadata,
                     Column('photo_id', Integer, ForeignKey('photos.id', ondelete='CASCADE')),
                     Column('tag_id', Integer, ForeignKey('tags.id', ondelete='CASCADE')),
                     )
+
+
+    
+
+
+
 
 
 class Photo(Base):
@@ -67,3 +79,4 @@ class Tag(Base):
     user_id = Column('user_id', ForeignKey('users.id', ondelete='CASCADE'), default=None)
 
     user = relationship('User', backref="tags")
+    

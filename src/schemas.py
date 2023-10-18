@@ -3,6 +3,10 @@ from typing import List, Optional
 from enum import Enum
 from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr, Field
+from typing import List
+from enum import Enum
+from fastapi import UploadFile
+from pydantic import BaseModel, EmailStr
 
 
 class Role(str, Enum):
@@ -15,6 +19,7 @@ class UserModel(BaseModel):
     username: str
     email: EmailStr
     password: str
+    is_active: bool
     roles: List[str] = ["User"]
 
 
