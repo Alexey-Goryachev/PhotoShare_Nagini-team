@@ -16,12 +16,10 @@ from src.routes.tags import router as tag_router
 app = FastAPI()
 
 # Конфігурація OAuth2 для Swagger
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/auth/login")
-
-app.include_router(auth_router, prefix='/auth')
-app.include_router(photos_router, prefix='/api')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 app.include_router(auth_router, prefix='/api')
+app.include_router(photos_router, prefix='/api')
 app.include_router(comment_router, prefix='/api')
 app.include_router(tag_router, prefix='/api')
 

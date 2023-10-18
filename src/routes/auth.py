@@ -6,7 +6,7 @@ from src.database.db import get_db
 from src.database.models import User
 from src.schemas import UserModel, UserResponse, TokenModel
 from src.repository import users as repository_users
-from src.authentication.auth import auth_service, create_access_token, get_current_user
+from src.authentication.auth import auth_service
 
 router = APIRouter(prefix='/auth', tags=["auth"])
 security = HTTPBearer()
@@ -42,7 +42,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
         raise HTTPException(status_code=400, detail="User is not active")
 
     # Генерація JWT токена
-    access_token = create_access_token(data={"sub": user.email, "message": "Logged successfully"})
+    access_token = auth_service.create_access_token(data={"sub": user.email, "message": "Logged successfully"})
 
     # Повертаємо об'єкт відповіді
     return {"access_token": access_token, "token_type": "bearer", "message": "Logged successfully"}
@@ -52,7 +52,7 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 @router.post("/ban/{user_id}", response_model=Dict[str, str])
 async def ban_user(
     user_id: int,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
     if not current_user or "Administrator" not in current_user.roles.split(","):
@@ -70,7 +70,7 @@ async def ban_user(
 # Анбан користувача
 
 @router.delete("/unban/{user_id}", response_model=Dict[str, str])
-async def unban_user(user_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def unban_user(user_id: int, current_user: User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
     if current_user.roles != "Administrator":
         raise HTTPException(status_code=403, detail="Permission denied")
 
