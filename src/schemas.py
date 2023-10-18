@@ -15,6 +15,7 @@ class UserModel(BaseModel):
     username: str
     email: EmailStr
     password: str
+    is_active: bool
     roles: List[str] = ["User"]
 
 

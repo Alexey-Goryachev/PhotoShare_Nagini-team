@@ -1,5 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException
+from typing import Annotated
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from src.routes.auth import router as auth_router
@@ -9,12 +11,15 @@ from src.database.db import get_db
 
 app = FastAPI()
 
-app.include_router(auth_router, prefix='/api')
+# Конфігурація OAuth2 для Swagger
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/auth/login")
+
+app.include_router(auth_router, prefix='/auth')
 app.include_router(photos_router, prefix='/api')
 
-# default route for the application
-app.include_router(auth_router)
-
+@app.get("/items/")
+async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"token": token}
 
 
 @app.get("/")

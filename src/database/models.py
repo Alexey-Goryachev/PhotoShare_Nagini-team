@@ -20,6 +20,7 @@ class User(Base):
     roles = Column(Enum("User", "Moderator", "Administrator",
                    name="user_roles"), default="User")
     created_at = Column('created_at', DateTime, default=func.now())
+    is_active = Column(Boolean, default=True)
 
 
 # відносини для фотографій і користувача
