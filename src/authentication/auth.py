@@ -25,43 +25,43 @@ class Auth:
         return self.pwd_context.hash(password)
 
 
-SECRET_KEY = "secret_key"
-ALGORITHM = "HS256"
+    SECRET_KEY = "secret_key"
+    ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+    oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 
-# Генерація токена
-def create_access_token(data: dict, expires_delta: Optional[float] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + timedelta(seconds=expires_delta)
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    # Генерація токена
+    def create_access_token(self, data: dict, expires_delta: Optional[float] = None):
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + timedelta(seconds=expires_delta)
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=15)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+        return encoded_jwt
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+    async def get_current_user(self, token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    try:
-        # Декодування JWT
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload["sub"]
-        if email is None:
+        try:
+            # Декодування JWT
+            payload = jwt.decode(token, self.SECRET_KEY, algorithms=[self.ALGORITHM])
+            email = payload["sub"]
+            if email is None:
+                raise credentials_exception
+        except JWTError as e:
             raise credentials_exception
-    except JWTError as e:
-        raise credentials_exception
 
-    user: User = db.query(User).filter(User.email == email).first()
-    if user is None:
-        raise credentials_exception
-    return user
+        user: User = db.query(User).filter(User.email == email).first()
+        if user is None:
+            raise credentials_exception
+        return user
 
 auth_service = Auth()
 

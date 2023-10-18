@@ -52,7 +52,7 @@ class PhotoBase(BaseModel):
 
 class PhotoCreate(BaseModel):
     description: str
-    image: UploadFile
+    # image: UploadFile
 
 
 class PhotoUpdate(BaseModel):
