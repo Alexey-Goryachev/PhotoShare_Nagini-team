@@ -42,7 +42,8 @@ async def create_tag(body: TagBase,
 @router.get("/my/", response_model=List[TagResponse])
 async def read_my_tags(skip: int = 0,
                        limit: int = 100,
-                       db: Session = Depends(get_db)
+                       db: Session = Depends(get_db),
+                       current_user: User = Depends(auth_service.get_current_user)
                        ):
     """
     The `read_my_tags function` returns a list of tags that the current user has created.\n
@@ -56,7 +57,7 @@ async def read_my_tags(skip: int = 0,
     - **:param** `current_user`: _User_: Get the user that is currently logged in.\n
     :return: A list of tag objects
     """
-    tags = await repository_tags.get_my_tags(skip, limit, db)
+    tags = await repository_tags.get_my_tags(skip, limit, db, current_user)
     return tags
 
 
