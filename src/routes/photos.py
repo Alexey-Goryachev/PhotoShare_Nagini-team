@@ -11,7 +11,7 @@ from src.database.models import Photo, User
 from src.repository import photos as repository_photos
 from src.schemas import PhotoTransform, TransformBodyModel, PhotoLinkTransform
 from src.services.photos import transform_image, create_link_transform_image
-from src.authentication.auth import get_current_user
+from src.authentication.auth import auth_service
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 

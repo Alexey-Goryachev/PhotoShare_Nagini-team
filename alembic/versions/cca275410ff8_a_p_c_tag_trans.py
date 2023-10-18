@@ -1,8 +1,8 @@
-"""'Us_Ph_Co_T'
+"""'a_p_c_tag_trans'
 
-Revision ID: c2f6894ccf07
+Revision ID: cca275410ff8
 Revises: 
-Create Date: 2023-10-18 15:59:15.967349
+Create Date: 2023-10-18 18:22:50.794098
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c2f6894ccf07'
+revision: str = 'cca275410ff8'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -38,6 +38,9 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('image_transform', sa.String(length=200), nullable=True),
+    sa.Column('qr_transform', sa.String(length=200), nullable=True),
+    sa.Column('public_id', sa.String(length=100), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )

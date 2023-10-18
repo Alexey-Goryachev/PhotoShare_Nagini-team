@@ -30,7 +30,7 @@ class UserDb(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserResponse(BaseModel):
@@ -146,7 +146,7 @@ class CommentModel(CommentBase):
     update_status: bool = False
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CommentUpdate(CommentModel):
@@ -154,7 +154,7 @@ class CommentUpdate(CommentModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 # ======
@@ -167,7 +167,7 @@ class TagModel(TagBase):
     pass
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class TagResponse(TagBase):
     id: int
@@ -175,4 +175,4 @@ class TagResponse(TagBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
