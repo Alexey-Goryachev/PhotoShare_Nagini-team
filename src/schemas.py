@@ -52,6 +52,7 @@ class PhotoBase(BaseModel):
 
 class PhotoCreate(BaseModel):
     description: str
+    #user_id: int 
 
 
 class PhotoUpdate(BaseModel):

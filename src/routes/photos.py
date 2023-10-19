@@ -8,6 +8,8 @@ from src.repository import users as repository_users
 from src.repository import photos as repository_photos
 from src.database.db import get_db
 
+
+
 router = APIRouter(prefix="/photos", tags=["photos"])
 security = HTTPBearer()
 
@@ -19,25 +21,47 @@ async def create_user_photo(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db)
 ):
+    """
+    **Create a new user photo🐍**\n
+    ___
+    - **:param**🪄 `image`: UploadFile: The image to upload.\n
+    - **:param**🪄 `description`: str: The description of the photo.\n
+    - **:param**🪄 `current_user`: User: The currently authenticated user.\n
+    - **:param**🪄 `db`: Session: The database session.\n
+    :return: PhotoResponse: The created photo response.
+    """
     if not current_user:
         raise HTTPException(status_code=401, detail="Authentication required")
 
     photo_data = PhotoCreate(description=description)
-    return repository_photos.create_user_photo(photo_data, image, db)
+    return repository_photos.create_user_photo(photo_data, image, db, current_user)
+
 
 
 @router.get("/user-photos/", response_model=PhotoListResponse)
-async def get_all_user_photos(
+async def get_user_photos(
     skip: int = 0,
     limit: int = 10,
+    db: Session = Depends(get_db),
     current_user: User = Depends(auth_service.get_current_user),
-    db: Session = Depends(get_db)
 ):
-    if not current_user or "Administrator" not in current_user.roles.split(","):
-        raise HTTPException(status_code=403, detail="Permission denied")
+    """
+    **Get a list of user photos with optional filtering and pagination🔮**\n
 
-    photos = await repository_photos.get_all_user_photos(skip, limit, db)
+    - **:param**⚡ `skip`: int: Number of photos to skip.\n
+    - **:param**⚡ `limit`: int: Maximum number of photos to return.\n
+    - **:param**⚡ `db`: Session: The database session.\n
+    - **:param**⚡ `current_user`: User: The currently authenticated user.\n
+    :return: PhotoListResponse: List of photo responses.
+    """
+    if "Administrator" in current_user.roles:
+        user_id = None  # Адміністратор має доступ до фотографій будь-якого користувача
+    else:
+        user_id = current_user.id
+    
+    photos = repository_photos.get_user_photos(user_id, skip, limit, db)
     return {"photos": photos}
+
 
 
 @router.get("/user-photos/{photo_id}", response_model=PhotoResponse)
@@ -46,14 +70,32 @@ async def get_user_photo_by_id(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db)
 ):
-    if not current_user or "Administrator" not in current_user.roles.split(","):
-        raise HTTPException(status_code=403, detail="Permission denied")
+    """
+    **Get a user photo by ID🪶**\n
 
-    photo = await repository_photos.get_user_photo_by_id(photo_id, db)
+    - **:param**🧹 `photo_id`: int: ID of the photo to retrieve.\n
+    - **:param**🧹 `current_user`: User: The currently authenticated user.\n
+    - **:param**🧹 `db`: Session: The database session.\n
+    :return: PhotoResponse: The requested photo response.\n
+    """
+    if "Administrator" in current_user.roles.split(","):
+        user_id = None  # Адміністратор має доступ до фотографій будь-якого користувача
+    else:
+        user_id = current_user.id
+
+    photo = db.query(Photo).filter(Photo.id == photo_id, (Photo.user_id == user_id) | (user_id == None)).first()
+
     if not photo:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Фото не знайдено")
-    return photo
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found")
+
+    return PhotoResponse(
+        id=photo.id,
+        image_url=photo.image_url,
+        description=photo.description,
+        created_at=photo.created_at
+    )
+
 
 
 @router.put("/user-photos/{photo_id}", response_model=PhotoResponse)
@@ -63,14 +105,27 @@ async def update_user_photo(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db)
 ):
-    if not current_user or "Administrator" not in current_user.roles.split(","):
-        raise HTTPException(status_code=403, detail="Permission denied")
+    """
+    **Update a user's photo description🦉**\n
 
-    photo = await repository_photos.update_user_photo(photo_id, updated_photo, db)
+    - **:param**⚯ `photo_id`: int: ID of the photo to update.\n
+    - **:param**⚯ `updated_photo`: PhotoUpdate: Data for updating the photo.\n
+    - **:param**⚯ `current_user`: User: The currently authenticated user.\n
+    - **:param**⚯ `db`: Session: The database session.\n
+    :return: PhotoResponse: The updated photo response.
+    """
+    photo = repository_photos.get_user_photo_by_id(photo_id, db)
+
     if not photo:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Фото не знайдено")
-    return photo
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found")
+
+    if not (current_user and ("Administrator" in current_user.roles.split(",")) or current_user.id == photo.user_id):
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    updated_photo = repository_photos.update_user_photo(photo, updated_photo, db)
+    return updated_photo
+
 
 
 @router.delete("/user-photos/{photo_id}", response_model=PhotoResponse)
@@ -79,14 +134,25 @@ async def delete_user_photo(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db)
 ):
-    if not current_user or "Administrator" not in current_user.roles.split(","):
-        raise HTTPException(status_code=403, detail="Permission denied")
+    """
+    **Delete a user's photo with access control for administrators and owners🧙🏻‍♂️**\n
 
-    result = await repository_photos.delete_user_photo(photo_id, db)
+    - **:param**🧹 `photo_id`: int: ID of the photo to delete.**\n
+    - **:param**🧹 `current_user`: User: The currently authenticated user.**\n
+    - **:param**🧹 `db`: Session: The database session.**\n
+    :return: PhotoResponse: The deleted photo response.
+    """ 
+    if not current_user:
+        raise HTTPException(status_code=403, detail="Permission denied")  # Користувач повинен бути авторизований для видалення фото
+    
+    is_admin = "Administrator" in current_user.roles.split(",")
+    
+    result = await repository_photos.delete_user_photo(photo_id, current_user.id, is_admin, db)
+    
     if result is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Фото не знайдено")
-
+            status_code=status.HTTP_404_NOT_FOUND, detail="Photo not found")
+    
     response_data = {
         "id": result.id,
         "image_url": result.image_url,
@@ -95,3 +161,6 @@ async def delete_user_photo(
     }
 
     return response_data
+
+
+
