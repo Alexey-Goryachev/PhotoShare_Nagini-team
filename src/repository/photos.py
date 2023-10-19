@@ -2,7 +2,7 @@ import cloudinary.uploader
 from src.schemas import PhotoResponse
 from sqlalchemy.orm import Session
 from src.database.models import Photo
-from src.schemas import PhotoCreate, PhotoUpdate
+from src.schemas import PhotoCreate, PhotoUpdate, PhotoListResponse
 from fastapi import UploadFile
 from src.utils import upload_file
 from src.database.db import SessionLocal
@@ -13,6 +13,8 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from faker import Faker
 from cloudinary.uploader import destroy
+from sqlalchemy.orm import Session
+from src.database.models import Photo
 
 
 cloudinary.config(
@@ -30,7 +32,7 @@ def init_cloudinary():
     )
 
 
-def create_photo(photo: PhotoCreate, image: UploadFile, db: Session) -> PhotoResponse:
+def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session) -> PhotoResponse:
     public_id = Faker().first_name()
 
     # Отримати байтові дані з об'єкта UploadFile
@@ -56,7 +58,7 @@ def create_photo(photo: PhotoCreate, image: UploadFile, db: Session) -> PhotoRes
     return PhotoResponse(**photo_response_data)
 
 
-def get_photos(db: SessionLocal, skip: int = 0, limit: int = 10) -> List[PhotoResponse]:
+def get_all_user_photos(skip: int, limit: int, db: Session) -> PhotoListResponse:
     photos = db.query(Photo).offset(skip).limit(limit).all()
     return [PhotoResponse(
         id=photo.id,
@@ -66,7 +68,7 @@ def get_photos(db: SessionLocal, skip: int = 0, limit: int = 10) -> List[PhotoRe
     ) for photo in photos]
 
 
-def get_photo_response(photo_id: int, db: Session):
+def get_user_photo_by_id(photo_id: int, db: Session) -> PhotoResponse:
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if not photo:
         return None
@@ -86,7 +88,7 @@ async def get_photo_by_id(photo_id: int, db: Session):
     return db.query(Photo).filter(Photo.id == photo_id).first()
 
 
-async def update_photo(photo_id: int, updated_photo: PhotoUpdate, db: Session):
+async def update_user_photo(photo_id: int, updated_photo: PhotoUpdate, db: Session):
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if photo:
         # Перевірка, чи в `updated_photo` є значення для `description`
@@ -102,7 +104,7 @@ def get_public_id_from_image_url(image_url: str) -> str:
     return public_id
 
 
-async def delete_photo(photo_id: int, db: Session):
+async def delete_user_photo(photo_id: int, db: Session):
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     if photo:
         # Видалення фотографії з Cloudinary за її public_id

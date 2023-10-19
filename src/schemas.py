@@ -52,7 +52,6 @@ class PhotoBase(BaseModel):
 
 class PhotoCreate(BaseModel):
     description: str
-    # image: UploadFile
 
 
 class PhotoUpdate(BaseModel):
@@ -107,6 +106,7 @@ class TagModel(TagBase):
 
     class Config:
         orm_mode = True
+
 
 class TagResponse(TagBase):
     id: int
