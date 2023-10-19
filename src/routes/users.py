@@ -26,14 +26,24 @@ async def edit_user_profile(
     current_user: UserDb = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
+    # Отримуємо інформацію про користувача з бази даних
     user = await repository_users.get_user_by_id(current_user.id, db)
 
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
-    # Здійснюємо оновлення даних користувача
+    # Якщо користувач хоче змінити свою електронну адресу
     if user_update.email is not None:
+        # Перевіряємо, чи існує користувач із новою електронною адресою
+        existing_user = await repository_users.get_user_by_email(user_update.email, db)
+        if existing_user and existing_user.id != user.id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="This user already exists. Please enter another email",
+            )
         user.email = user_update.email
+
+    # Здійснюємо оновлення даних користувача
     if user_update.username is not None:
         user.username = user_update.username
 
