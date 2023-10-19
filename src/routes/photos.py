@@ -23,7 +23,7 @@ async def create_user_photo(
         raise HTTPException(status_code=401, detail="Authentication required")
 
     photo_data = PhotoCreate(description=description)
-    return repository_photos.create_photo(photo_data, image, db)
+    return repository_photos.create_user_photo(photo_data, image, db)
 
 
 @router.get("/user-photos/", response_model=PhotoListResponse)
