@@ -1,4 +1,4 @@
-import cloudinary.uploader
+# import cloudinary.uploader
 from src.schemas import PhotoResponse
 from sqlalchemy.orm import Session
 from src.database.models import Photo
@@ -80,11 +80,11 @@ def get_user_photo_by_id(photo_id: int, db: Session) -> PhotoResponse:
     )
 
 
-async def get_all_photos(skip: int, limit: int, db: Session):
+async def get_all_user_photos(skip: int, limit: int, db: Session):
     return db.query(Photo).offset(skip).limit(limit).all()
 
 
-async def get_photo_by_id(photo_id: int, db: Session):
+async def get_user_photo_by_id(photo_id: int, db: Session):
     return db.query(Photo).filter(Photo.id == photo_id).first()
 
 

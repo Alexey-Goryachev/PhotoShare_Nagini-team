@@ -36,7 +36,7 @@ async def get_all_user_photos(
     if not current_user or "Administrator" not in current_user.roles.split(","):
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    photos = await repository_photos.get_all_photos(skip, limit, db)
+    photos = await repository_photos.get_all_user_photos(skip, limit, db)
     return {"photos": photos}
 
 
@@ -49,7 +49,7 @@ async def get_user_photo_by_id(
     if not current_user or "Administrator" not in current_user.roles.split(","):
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    photo = await repository_photos.get_photo_by_id(photo_id, db)
+    photo = await repository_photos.get_user_photo_by_id(photo_id, db)
     if not photo:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Фото не знайдено")
@@ -66,7 +66,7 @@ async def update_user_photo(
     if not current_user or "Administrator" not in current_user.roles.split(","):
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    photo = await repository_photos.update_photo(photo_id, updated_photo, db)
+    photo = await repository_photos.update_user_photo(photo_id, updated_photo, db)
     if not photo:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Фото не знайдено")
@@ -82,7 +82,7 @@ async def delete_user_photo(
     if not current_user or "Administrator" not in current_user.roles.split(","):
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    result = await repository_photos.delete_photo(photo_id, db)
+    result = await repository_photos.delete_user_photo(photo_id, db)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Фото не знайдено")
