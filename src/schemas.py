@@ -6,6 +6,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import List
 from enum import Enum
 from fastapi import UploadFile
+from pydantic import BaseModel, EmailStr, constr, SecretStr
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -27,6 +28,7 @@ class UserDb(BaseModel):
     id: int
     username: str
     email: EmailStr
+    photos: List
     created_at: datetime
 
     class Config:
@@ -37,6 +39,12 @@ class UserResponse(BaseModel):
     user: UserDb
     role: str
     detail: str = "User successfully created"
+
+class UserUpdate(BaseModel):
+    email: EmailStr
+    username: constr(min_length=3, max_length=50)
+    password: SecretStr
+
 
 
 class TokenModel(BaseModel):
