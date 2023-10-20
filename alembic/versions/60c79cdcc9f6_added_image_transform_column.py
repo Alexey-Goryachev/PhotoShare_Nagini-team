@@ -1,8 +1,8 @@
-"""'a_p_c_tag_trans'
+"""Added Image_transform column
 
-Revision ID: cca275410ff8
+Revision ID: 60c79cdcc9f6
 Revises: 
-Create Date: 2023-10-18 18:22:50.794098
+Create Date: 2023-10-20 15:08:37.277092
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cca275410ff8'
+revision: str = '60c79cdcc9f6'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None

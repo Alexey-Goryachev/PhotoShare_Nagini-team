@@ -28,7 +28,7 @@ async def signup(body: UserModel, db: Session = Depends(get_db)):
     body.password = auth_service.get_password_hash(body.password)
     body.is_active = True
     new_user = await repository_users.create_user(body, db)
-    return {"user": new_user, "role": body.roles[0], "detail": "User successfully created"}
+    return {"user": new_user, "role": body.roles[0], "detail": "User successfully created", "photos_count": 0}
 
 
 #Логін
