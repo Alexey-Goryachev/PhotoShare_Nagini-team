@@ -35,6 +35,7 @@ def init_cloudinary():
 def get_public_id_from_image_url(image_url: str) -> str:
     parts = image_url.split("/")
     public_id = parts[-1].rsplit(".", 1)[0]
+    public_id = public_id.replace('%40', '@')
     return public_id
 
 
@@ -154,7 +155,7 @@ async def delete_user_photo(photo_id: int, user_id: int, is_admin: bool, db: Ses
     :param db: Session: Database session to use.
     :return: Photo: The deleted photo object.
     """
-    init_cloudinary()
+    
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     
     if not photo:
@@ -165,8 +166,11 @@ async def delete_user_photo(photo_id: int, user_id: int, is_admin: bool, db: Ses
     
     # Видалення фотографії з Cloudinary за її public_id
     public_id = get_public_id_from_image_url(photo.image_url)
+
+    init_cloudinary()
     destroy(public_id)
-    destroy(public_id + '_qr')
+    destroy("PhotoshareApp_tr/" + public_id)
+    destroy("PhotoshareApp_tr/" + public_id + '_qr')
 
     db.delete(photo)
     db.commit()

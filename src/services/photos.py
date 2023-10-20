@@ -11,7 +11,7 @@ from PIL import Image
 from io import BytesIO
 from src.repository.photos import init_cloudinary
 
-async def transform_image(photo_id: int, user: User, body: TransformBodyModel, db: Session ) -> Photo | None:
+async def transform_image(photo_id: int, body: TransformBodyModel, user: User, db: Session ) -> Photo | None:
     
     init_cloudinary()
     photo = db.query(Photo).filter(and_(Photo.id == photo_id, Photo.user_id == user.id)).first()

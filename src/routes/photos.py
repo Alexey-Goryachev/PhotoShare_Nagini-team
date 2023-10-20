@@ -198,7 +198,7 @@ async def photo_transformation(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
-    photo = await transform_image(photo_id, body, db, current_user)
+    photo = await transform_image(photo_id, body, current_user, db)
     if photo is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Image not found"
