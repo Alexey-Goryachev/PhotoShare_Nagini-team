@@ -48,7 +48,7 @@ def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session, curren
     :param current_user: User: The user creating the photo.
     :return: PhotoResponse: The created photo response.
     """
-
+    init_cloudinary()
     # Створюю унікальний public_id на основі поточного часу
     timestamp = datetime.now().timestamp()
     public_id = f"{current_user.email}_{current_user.id}_{int(timestamp)}"
@@ -153,6 +153,7 @@ async def delete_user_photo(photo_id: int, user_id: int, is_admin: bool, db: Ses
     :param db: Session: Database session to use.
     :return: Photo: The deleted photo object.
     """
+    init_cloudinary()
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     
     if not photo:

@@ -12,7 +12,7 @@ from src.database.db import get_db
 from src.schemas import PhotoCreate, PhotoResponse, PhotoListResponse, PhotoUpdate
 from src.repository import photos as repository_photos
 from src.database.db import SessionLocal
-from src.repository.photos import get_all_photos
+# from src.repository.photos import get_all_photos
 from starlette.responses import JSONResponse
 from src.database.models import Photo, User
 from src.repository import photos as repository_photos
