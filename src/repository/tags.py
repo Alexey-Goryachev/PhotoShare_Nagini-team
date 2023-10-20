@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import Connection
+# from sqlalchemy import Connection
 from sqlalchemy.orm import Session
 
 from src.database.models import Tag, User, Photo

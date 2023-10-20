@@ -64,7 +64,7 @@ class PhotoBase(BaseModel):
 
 class PhotoCreate(BaseModel):
     description: str
-    # image: UploadFile
+    #user_id: int 
 
 
 class PhotoUpdate(BaseModel):
@@ -176,6 +176,7 @@ class TagModel(TagBase):
 
     class Config:
         from_attributes = True
+
 
 class TagResponse(TagBase):
     id: int
