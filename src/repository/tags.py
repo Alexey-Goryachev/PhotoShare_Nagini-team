@@ -9,7 +9,7 @@ from src.schemas import TagBase
 async def create_tag(body: TagBase,
                      db: Session,
                      user: User
-                     ) -> Tag:
+                     ) -> Tag | None:
     """
     The create_tag function creates a new tag in the database.
 
@@ -18,7 +18,7 @@ async def create_tag(body: TagBase,
     :param db: Session: Access the database
     :return: A hashtag object
     """
-    tag = find_tag(body, db)
+    tag = db.query(Tag).filter(Tag.title == body.title).first()
     if not tag:
         tag = Tag(
             title=body.title,
@@ -27,7 +27,9 @@ async def create_tag(body: TagBase,
         db.add(tag)
         db.commit()
         db.refresh(tag)
-    return tag
+        return tag
+    else:
+        return None
 
 
 async def get_my_tags(skip: int,
@@ -79,22 +81,6 @@ async def get_tag_by_id(tag_id: int,
     :return: A hashtag object
     """
     return db.query(Tag).filter(Tag.id == tag_id).first()
-
-
-async def find_tag(body: TagBase,
-                   db: Session
-                   ) -> Tag:
-    """
-    The `find_tag function` look up a tag (title) in the database.
-
-    :param body: HashtagBase: Get the title of the hashtag from the request body
-    :param user: User: Get the user id of the current user.\n
-    :param db: Session: Access the database
-    :return: A tag object
-    """
-    tag = db.query(Tag).filter(Tag.title == body.title).first()
-
-    return tag
 
 
 async def update_tag(tag_id: int,

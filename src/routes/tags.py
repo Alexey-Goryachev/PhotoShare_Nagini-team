@@ -7,7 +7,7 @@ from src.conf import messages as message
 from src.database.db import get_db
 from src.schemas import TagBase, TagResponse
 from src.repository import tags as repository_tags
-from src.database.models import User
+from src.database.models import User, Tag
 from src.services.roles import RoleChecker
 from src.schemas import Role
 from src.authentication.auth import auth_service
@@ -37,14 +37,13 @@ async def create_tag(body: TagBase,
     - **:param** `current_user`: _User_: Get the user who is currently logged in
     :return: The created tag
     """
-    existing_tag = await repository_tags.find_tag(body, db)
-    if existing_tag:
+    tag = await repository_tags.create_tag(body, db, current_user)
+    if not tag:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=message.TAG_ALREADY_EXISTS,
+            detail=message.TAG_ALREADY_EXISTS
         )
-    else:
-        return await repository_tags.create_tag(body, db, current_user)
+    return tag
 
 
 @router.get("/my/", response_model=List[TagResponse])
