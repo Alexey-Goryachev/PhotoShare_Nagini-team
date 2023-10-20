@@ -4,18 +4,36 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import Dict
 from src.database.db import get_db
-from src.database.models import User
-from src.schemas import UserModel, UserResponse, TokenModel, UserDb, UserUpdate
+from src.database import models
+from src.database.models import User, Photo
+from src.repository.photos import get_user_photos
+from src.schemas import UserModel, UserResponse, TokenModel, UserDb, UserUpdate, UserWithPhotos
 from src.repository import users as repository_users
 from src.authentication.auth import auth_service
 
 router = APIRouter(prefix='/users', tags=["users"])
 
+# Рахуємо фото
+def get_user_photos_count(user_id: int, db: Session) -> int:
+    # Отримуємо кількість фотографій для користувача
+    photos_count = db.query(Photo).filter(Photo.user_id == user_id).count()
+    return photos_count
+
+
 
 # Профіль користувача
 
 @router.get("/me/", response_model=UserDb)
-async def read_users_me(current_user: User = Depends(auth_service.get_current_user)):
+async def read_users_me(
+    current_user: UserDb = Depends(auth_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    # Отримуємо кількість фотографій для поточного користувача
+    photos_count = get_user_photos_count(current_user.id, db)
+
+    # Додаємо кількість фотографій до відповіді
+    current_user.photos_count = photos_count
+
     return current_user
 
 # Редагування профілю користувача

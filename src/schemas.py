@@ -28,7 +28,7 @@ class UserDb(BaseModel):
     id: int
     username: str
     email: EmailStr
-    photos: List
+    photos_count: int
     created_at: datetime
 
     class Config:
@@ -39,6 +39,7 @@ class UserResponse(BaseModel):
     user: UserDb
     role: str
     detail: str = "User successfully created"
+
 
 class UserUpdate(BaseModel):
     email: EmailStr
@@ -61,10 +62,12 @@ class PhotoBase(BaseModel):
     qr_transform: str
     public_id: str
 ########################
+class UserWithPhotos(UserDb):
+    photos: List[PhotoBase]
 
 class PhotoCreate(BaseModel):
     description: str
-    # image: UploadFile
+    #user_id: int 
 
 
 class PhotoUpdate(BaseModel):
@@ -176,6 +179,7 @@ class TagModel(TagBase):
 
     class Config:
         from_attributes = True
+
 
 class TagResponse(TagBase):
     id: int

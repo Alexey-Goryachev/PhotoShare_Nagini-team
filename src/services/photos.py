@@ -9,16 +9,12 @@ from src.conf.config import settings
 import qrcode
 from PIL import Image
 from io import BytesIO
+from src.repository.photos import init_cloudinary
 
-async def transform_image(photo_id: int, body: TransformBodyModel, db: Session) -> Photo | None:
-    cloudinary.config(
-        cloud_name=settings.cloudinary_name,
-        api_key=settings.cloudinary_api_key,
-        api_secret=settings.cloudinary_api_secret,
-        secure=True
-    )
+async def transform_image(photo_id: int, body: TransformBodyModel, user: User, db: Session ) -> Photo | None:
     
-    photo = db.query(Photo).filter((Photo.id == photo_id)).first()
+    init_cloudinary()
+    photo = db.query(Photo).filter(and_(Photo.id == photo_id, Photo.user_id == user.id)).first()
     if photo:
         transformation = []
         
@@ -70,14 +66,10 @@ async def transform_image(photo_id: int, body: TransformBodyModel, db: Session) 
         else:
             return photo
         
-async def create_link_transform_image(photo_id: int, db: Session) -> str | None:
-    cloudinary.config(
-        cloud_name=settings.cloudinary_name,
-        api_key=settings.cloudinary_api_key,
-        api_secret=settings.cloudinary_api_secret,
-        secure=True
-    )
-    photo = db.query(Photo).filter(Photo.id == photo_id).first()
+async def create_link_transform_image(photo_id: int, user: User, db: Session) -> str | None:
+
+    init_cloudinary()
+    photo = db.query(Photo).filter(and_(Photo.id == photo_id, Photo.user_id == user.id)).first()
     if photo:
         qr = qrcode.QRCode(
         version=1,
