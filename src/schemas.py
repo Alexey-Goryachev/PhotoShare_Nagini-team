@@ -40,6 +40,7 @@ class UserResponse(BaseModel):
     role: str
     detail: str = "User successfully created"
 
+
 class UserUpdate(BaseModel):
     email: EmailStr
     username: constr(min_length=3, max_length=50)
