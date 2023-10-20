@@ -19,7 +19,7 @@ async def signup(body: UserModel, db: Session = Depends(get_db)):
     if "@" not in body.email:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email")
 
-    exist_user = await repository_users.get_user_by_email(body.email, db)
+    #exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
     if body.roles[0] not in ["User", "Moderator", "Administrator"]:
