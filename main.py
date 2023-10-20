@@ -12,17 +12,19 @@ from src.database.db import get_db
 from src.routes.auth import router as auth_router
 from src.routes.comments import router as comment_router
 from src.routes.tags import router as tag_router
-
+from src.routes.users import router as user_router
 app = FastAPI()
 
 # Конфігурація OAuth2 для Swagger
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
+# default route for the application
+# app.include_router(auth_router)
 app.include_router(auth_router, prefix='/api')
 app.include_router(photos_router, prefix='/api')
 app.include_router(comment_router, prefix='/api')
 app.include_router(tag_router, prefix='/api')
-
+app.include_router(user_router, prefix='/api')
 
 @app.get("/items/")
 async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):

@@ -22,7 +22,8 @@ fastapi-mail = "^1.4.1"
 fastapi-limiter = "^0.1.5"
 cloudinary = "^1.34.0"
 libgravatar = "^1.0.4"
-faker = "^19.11.0"
+faker = "^19.10.0"
+qrcode = {extras = ["pil"], version = "^7.4.2"}
 
 
 [tool.poetry.group.dev.dependencies]

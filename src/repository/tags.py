@@ -28,7 +28,7 @@ async def create_tag(body: TagBase, db: Session) -> Tag:
     return tag
 
 
-async def get_my_tags(skip: int, limit: int, user: User, db: Session) -> List[Tag]:
+async def get_my_tags(skip: int, limit: int, db: Session, user: User) -> List[Tag]:
     """
     The get_my_tags function returns a list of Hashtag objects that are associated with the user.
     The skip and limit parameters allow for pagination.

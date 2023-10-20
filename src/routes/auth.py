@@ -1,10 +1,11 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Security
 from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import Dict
 from src.database.db import get_db
 from src.database.models import User
-from src.schemas import UserModel, UserResponse, TokenModel
+from src.schemas import UserModel, UserResponse, TokenModel, UserDb, UserUpdate
 from src.repository import users as repository_users
 from src.authentication.auth import auth_service
 
@@ -67,6 +68,8 @@ async def ban_user(
     db.refresh(user)
     return {"message": "User banned successfully"}
 
+
+
 # Анбан користувача
 
 @router.delete("/unban/{user_id}", response_model=Dict[str, str])
@@ -82,4 +85,5 @@ async def unban_user(user_id: int, current_user: User = Depends(auth_service.get
     db.commit()
     db.refresh(user)
     return {"message": "User unbanned successfully"}
+
 

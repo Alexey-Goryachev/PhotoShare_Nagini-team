@@ -14,20 +14,22 @@ from src.database.models import Photo, User
 from fastapi.exceptions import HTTPException
 from datetime import datetime
 
+from src.conf.config import settings
 
 
-cloudinary.config(
-    cloud_name="dpqnfhenr",
-    api_key="679423711358256",
-    api_secret="qWDJar70AfWF-iGLiKw64EOPxKI"
-)
+# cloudinary.config(
+#     cloud_name="dpqnfhenr",
+#     api_key="679423711358256",
+#     api_secret="qWDJar70AfWF-iGLiKw64EOPxKI"
+# )
 
 
 def init_cloudinary():
     cloudinary.config(
-        cloud_name="dpqnfhenr",
-        api_key="679423711358256",
-        api_secret="qWDJar70AfWF-iGLiKw64EOPxKI"
+        cloud_name=settings.cloudinary_name,
+        api_key=settings.cloudinary_api_key,
+        api_secret=settings.cloudinary_api_secret,
+        secure=True
     )
 
 def get_public_id_from_image_url(image_url: str) -> str:
@@ -64,7 +66,7 @@ def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session, curren
 
     photo_response_data = db_photo.__dict__
     photo_response_data.pop("_sa_instance_state", None)
-
+    print(photo_response_data)
     return PhotoResponse(**photo_response_data)
 
 
