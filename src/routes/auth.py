@@ -19,7 +19,6 @@ async def signup(body: UserModel, db: Session = Depends(get_db)):
     if "@" not in body.email:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email")
 
-    #exist_user = await repository_users.get_user_by_email(body.email, db)
     if exist_user:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account already exists")
     if body.roles[0] not in ["User", "Moderator", "Administrator"]:
@@ -28,7 +27,20 @@ async def signup(body: UserModel, db: Session = Depends(get_db)):
     body.password = auth_service.get_password_hash(body.password)
     body.is_active = True
     new_user = await repository_users.create_user(body, db)
-    return {"user": new_user, "role": body.roles[0], "detail": "User successfully created"}
+
+    user_db = UserResponse(
+        user=UserDb(
+            id=new_user.id,
+            username=new_user.username,
+            email=new_user.email,
+            photos_count=0,  # Set the initial value for photos_count
+            created_at=new_user.created_at,
+        ),
+        role=body.roles[0],
+        detail="User successfully created",
+    )
+
+    return user_db
 
 
 #Логін
