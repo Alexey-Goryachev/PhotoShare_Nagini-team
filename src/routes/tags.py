@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
-from src.conf.messages import NOT_FOUND
+from src.conf import messages as message
 
 from src.database.db import get_db
 from src.schemas import TagBase, TagResponse
@@ -14,14 +14,15 @@ from src.authentication.auth import auth_service
 
 router = APIRouter(prefix='/tags', tags=["tags"])
 
-# allowed_get_all_hashtags = RoleChecker([Role.Administrator])
-# allowed_remove_hashtag = RoleChecker([Role.Administrator])
-# allowed_edit_hashtag = RoleChecker([Role.Administrator])
+allowed_get_all_tags = RoleChecker([Role.Administrator])
+allowed_remove_tag = RoleChecker([Role.Administrator])
+allowed_edit_tag = RoleChecker([Role.Administrator])
 
 
-@router.post("/new/", response_model=TagResponse)
+@router.post("/", response_model=TagResponse)
 async def create_tag(body: TagBase,
-                     db: Session = Depends(get_db)
+                     db: Session = Depends(get_db),
+                     current_user: User = Depends(auth_service.get_current_user)
                      ):
     """
     The `create_tag function` creates a new tag in the database.\n
@@ -36,7 +37,14 @@ async def create_tag(body: TagBase,
     - **:param** `current_user`: _User_: Get the user who is currently logged in
     :return: The created tag
     """
-    return await repository_tags.create_tag(body, db)
+    existing_tag = await repository_tags.find_tag(body, db)
+    if existing_tag:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=message.TAG_ALREADY_EXISTS,
+        )
+    else:
+        return await repository_tags.create_tag(body, db, current_user)
 
 
 @router.get("/my/", response_model=List[TagResponse])
@@ -61,10 +69,11 @@ async def read_my_tags(skip: int = 0,
     return tags
 
 
-@router.get("/all/", response_model=List[TagResponse])
+@router.get("/all/", response_model=List[TagResponse], dependencies=[Depends(allowed_get_all_tags)])
 async def read_all_tags(skip: int = 0,
                         limit: int = 100,
-                        db: Session = Depends(get_db)
+                        db: Session = Depends(get_db),
+                        current_user: User = Depends(auth_service.get_current_user)
                         ):
     """
     The `read_all_tags function` returns a list of all tags in the database.\n
@@ -83,9 +92,10 @@ async def read_all_tags(skip: int = 0,
     return tags
 
 
-@router.get("/by_id/{tag_id}", response_model=TagResponse)
+@router.get("/{tag_id}", response_model=TagResponse)
 async def read_tag_by_id(tag_id: int,
-                         db: Session = Depends(get_db)
+                         db: Session = Depends(get_db),
+                         current_user: User = Depends(auth_service.get_current_user)
                          ):
     """
     The `read_tag_by_id function` returns a single tag by its id.\n
@@ -103,14 +113,15 @@ async def read_tag_by_id(tag_id: int,
     """
     tag = await repository_tags.get_tag_by_id(tag_id, db)
     if tag is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NOT_FOUND)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message.NOT_FOUND)
     return tag
 
 
-@router.put("/update_tag/{tag_id}", response_model=TagResponse)
+@router.put("/{tag_id}", response_model=TagResponse, dependencies=[Depends(allowed_edit_tag)])
 async def update_tag(body: TagBase,
                      tag_id: int,
-                     db: Session = Depends(get_db)
+                     db: Session = Depends(get_db),
+                     current_user: User = Depends(auth_service.get_current_user)
                      ):
     """
     The `update_tag function` updates a tag in the database.\n
@@ -130,13 +141,14 @@ async def update_tag(body: TagBase,
     """
     tag = await repository_tags.update_tag(tag_id, body, db)
     if tag is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NOT_FOUND)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message.NOT_FOUND)
     return tag
 
 
-@router.delete("/del/{tag_id}", response_model=TagResponse)
+@router.delete("/{tag_id}", response_model=TagResponse, dependencies=[Depends(allowed_remove_tag)])
 async def remove_tag(tag_id: int,
-                     db: Session = Depends(get_db)
+                     db: Session = Depends(get_db),
+                     current_user: User = Depends(auth_service.get_current_user)
                      ):
     """
     The `remove_tag function` removes a tag from the database.\n
@@ -154,5 +166,5 @@ async def remove_tag(tag_id: int,
     """
     tag = await repository_tags.remove_tag(tag_id, db)
     if tag is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NOT_FOUND)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message.NOT_FOUND)
     return tag

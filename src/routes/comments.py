@@ -13,16 +13,18 @@ from src.schemas import Role
 
 router = APIRouter(prefix='/comments', tags=["comments"])
 
-# allowed_get_comments = RoleChecker([Role.Administrator, Role.Moderator, Role.User])
-# allowed_create_comments = RoleChecker([Role.Administrator, Role.Moderator, Role.User])
-# allowed_update_comments = RoleChecker([Role.Administrator, Role.Moderator])
-# allowed_remove_comments = RoleChecker([Role.Administrator, Role.Moderator])
+# Set permissions by RoleChecker for current route
+allowed_get_comments = RoleChecker([Role.Administrator, Role.Moderator, Role.User])
+allowed_create_comments = RoleChecker([Role.Administrator, Role.Moderator, Role.User])
+allowed_update_comments = RoleChecker([Role.Administrator, Role.Moderator, Role.User])
+allowed_remove_comments = RoleChecker([Role.Administrator, Role.Moderator])
 
 
-@router.post("/new/{photos_id}", response_model=CommentModel)
+@router.post("/{photos_id}", response_model=CommentModel, dependencies=[Depends(allowed_create_comments)])
 async def create_comment(photos_id: int,
                          body: CommentBase,
-                         db: Session = Depends(get_db)
+                         db: Session = Depends(get_db),
+                         current_user: User = Depends(auth_service.get_current_user)
                          ):
     """
     The `create_comment function` creates a new comment for the photo with the given id.\n\n
@@ -36,14 +38,15 @@ async def create_comment(photos_id: int,
     - **:param** `current_user`: _User_: Get the current user\n
     :return: A comment object, which is then serialized as json
     """
-    new_comment = await repository_comments.create_comment(photos_id, body, db)
+    new_comment = await repository_comments.create_comment(photos_id, body, db, current_user)
     return new_comment
 
 
-@router.put("/edit/{comment_id}", response_model=CommentUpdate)
+@router.put("/{comment_id}", response_model=CommentUpdate, dependencies=[Depends(allowed_update_comments)])
 async def edit_comment(comment_id: int,
                        body: CommentBase,
-                       db: Session = Depends(get_db)
+                       db: Session = Depends(get_db),
+                       current_user: User = Depends(auth_service.get_current_user)
                        ):
     """
     The `edit_comment function` allows a user to edit their own comment.\n\n
@@ -57,17 +60,18 @@ async def edit_comment(comment_id: int,
     - **:param** `body`: _CommentBase_: Pass the comment body to the edit_comment function\n
     - **:param** `db`: _Session_: Get the database session\n
     - **:param** `current_user`: _User_: Get the user who is currently logged in\n
-    :return: None, but the function expects a commentbase object\n
+    :return: None, but the function expects a CommentBase object\n
     """
-    edited_comment = await repository_comments.edit_comment(comment_id, body, db)
+    edited_comment = await repository_comments.edit_comment(comment_id, body, db, current_user)
     if edited_comment is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message.COMM_NOT_FOUND)
     return edited_comment
 
 
-@router.delete("/delete/{comment_id}", response_model=CommentModel)
+@router.delete("/{comment_id}", response_model=CommentModel, dependencies=[Depends(allowed_remove_comments)])
 async def delete_comment(comment_id: int,
-                         db: Session = Depends(get_db)
+                         db: Session = Depends(get_db),
+                         current_user: User = Depends(auth_service.get_current_user)
                          ):
     """
     The `delete_comment function` deletes a comment from the database.\n\n
@@ -81,15 +85,16 @@ async def delete_comment(comment_id: int,
     - **:param** `current_user`: _User_: Check if the user is logged in
     :return: The deleted comment
     """
-    deleted_comment = await repository_comments.delete_comment(comment_id, db)
+    deleted_comment = await repository_comments.delete_comment(comment_id, db, current_user)
     if deleted_comment is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message.COMM_NOT_FOUND)
     return deleted_comment
 
 
-@router.get("/single/{comment_id}", response_model=CommentModel)
+@router.get("/{comment_id}", response_model=CommentModel, dependencies=[Depends(allowed_get_comments)])
 async def single_comment(comment_id: int,
-                         db: Session = Depends(get_db)
+                         db: Session = Depends(get_db),
+                         current_user: User = Depends(auth_service.get_current_user)
                          ):
     """
     The `single_comment function` returns a single comment from the database.\n\n
@@ -105,13 +110,13 @@ async def single_comment(comment_id: int,
     - **:param** `current_user`: _User_: Get the current user from the database
     :return: The comment object, but i want to return the comment_id
     """
-    comment = await repository_comments.show_single_comment(comment_id, db)
+    comment = await repository_comments.show_single_comment(comment_id, db, current_user)
     if comment is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message.COMM_NOT_FOUND)
     return comment
 
 
-@router.get("/by_author/{user_id}", response_model=List[CommentModel])
+@router.get("/all/{user_id}", response_model=List[CommentModel], dependencies=[Depends(allowed_get_comments)])
 async def by_user_comments(user_id: int,
                            db: Session = Depends(get_db)
                            ):
@@ -137,28 +142,28 @@ async def by_user_comments(user_id: int,
     return comments
 
 
-@router.get("/post_by_author/{user_id}/{photo_id}", response_model=List[CommentModel])
-async def by_user_post_comments(user_id: int,
+@router.get("/{user_id}/{photo_id}", response_model=List[CommentModel], dependencies=[Depends(allowed_get_comments)])
+async def by_user_photo_comments(user_id: int,
                                 photos_id: int,
                                 db: Session = Depends(get_db)
                                 ):
     """
-    The `by_user_post_comments function` returns all comments for a given user and post.\n
+    The `by_user_photo_comments function` returns all comments for a given user and photo.\n
     **Args:**\n
     `user_id` (_int_): The id of the user whose comments are being retrieved.\n
     `post_id` (_int_): The id of the post whose comments are being retrieved.\n
     **Returns:**\n
-    A list containing all comment objects associated with a given user and post.\n
+    A list containing all comment objects associated with a given user and photo.\n
 
     ___
 
     - **:param** `user_id`: _int_: Specify the `user_id` of the user whose comments we want to retrieve\n
-    - **:param** `photos_id`: _int_: Get the comments for a specific phot\n
+    - **:param** `photos_id`: _int_: Get the comments for a specific photo\n
     - **:param** `db`: _Session_: Access the database\n
     - **:param** `current_user`: _User_: Get the current user who is logged in\n
-    :return: A list of comments that belong to a post
+    :return: A list of comments that belong to a photo
     """
-    comments = await repository_comments.show_user_post_comments(user_id, photos_id, db)
+    comments = await repository_comments.show_user_comments_photo(user_id, photos_id, db)
     if comments is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=message.COMM_NOT_FOUND)
     return comments

@@ -1,13 +1,15 @@
 from typing import List
 
-from sqlalchemy import Connection
 from sqlalchemy.orm import Session
 
 from src.database.models import Tag, User, Photo
 from src.schemas import TagBase
 
 
-async def create_tag(body: TagBase, db: Session) -> Tag:
+async def create_tag(body: TagBase,
+                     db: Session,
+                     user: User
+                     ) -> Tag:
     """
     The create_tag function creates a new tag in the database.
 
@@ -16,11 +18,11 @@ async def create_tag(body: TagBase, db: Session) -> Tag:
     :param db: Session: Access the database
     :return: A hashtag object
     """
-    tag = db.query(Tag).filter(Tag.title == body.title).first()
+    tag = find_tag(body, db)
     if not tag:
         tag = Tag(
-            title=body.title
-            # user_id=user.id,
+            title=body.title,
+            user_id=user.id
         )
         db.add(tag)
         db.commit()
@@ -28,7 +30,10 @@ async def create_tag(body: TagBase, db: Session) -> Tag:
     return tag
 
 
-async def get_my_tags(skip: int, limit: int, db: Session, user: User) -> List[Tag]:
+async def get_my_tags(skip: int,
+                      limit: int,
+                      db: Session,
+                      user: User) -> List[Tag]:
     """
     The get_my_tags function returns a list of Hashtag objects that are associated with the user.
     The skip and limit parameters allow for pagination.
@@ -42,7 +47,10 @@ async def get_my_tags(skip: int, limit: int, db: Session, user: User) -> List[Ta
     return db.query(Tag).filter(Tag.user_id == user.id).offset(skip).limit(limit).all()
 
 
-async def get_all_tags(skip: int, limit: int, db: Session) -> List[Tag]:
+async def get_all_tags(skip: int,
+                       limit: int,
+                       db: Session
+                       ) -> List[Tag]:
     """
     The get_all_tags function returns a list of all the tags in the database.
 
@@ -55,7 +63,9 @@ async def get_all_tags(skip: int, limit: int, db: Session) -> List[Tag]:
     return db.query(Tag).offset(skip).limit(limit).all()
 
 
-async def get_tag_by_id(tag_id: int, db: Session) -> Tag:
+async def get_tag_by_id(tag_id: int,
+                        db: Session
+                        ) -> Tag:
     """
     The get_tag_by_id function returns a Hashtag object from the database based on its id.
         Args:
@@ -71,7 +81,26 @@ async def get_tag_by_id(tag_id: int, db: Session) -> Tag:
     return db.query(Tag).filter(Tag.id == tag_id).first()
 
 
-async def update_tag(tag_id: int, body: TagBase, db: Session) -> Tag | None:
+async def find_tag(body: TagBase,
+                   db: Session
+                   ) -> Tag:
+    """
+    The `find_tag function` look up a tag (title) in the database.
+
+    :param body: HashtagBase: Get the title of the hashtag from the request body
+    :param user: User: Get the user id of the current user.\n
+    :param db: Session: Access the database
+    :return: A tag object
+    """
+    tag = db.query(Tag).filter(Tag.title == body.title).first()
+
+    return tag
+
+
+async def update_tag(tag_id: int,
+                     body: TagBase,
+                     db: Session
+                     ) -> Tag | None:
     """
     The update_tag function updates a tag in the database.
         Args:
@@ -91,7 +120,9 @@ async def update_tag(tag_id: int, body: TagBase, db: Session) -> Tag | None:
     return tag
 
 
-async def remove_tag(tag_id: int, db: Session) -> Tag | None:
+async def remove_tag(tag_id: int,
+                     db: Session
+                     ) -> Tag | None:
     """
     The remove_tag function removes a tag from the database.
 
