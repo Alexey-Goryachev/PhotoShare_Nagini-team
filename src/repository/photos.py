@@ -34,7 +34,8 @@ def init_cloudinary():
 
 def get_public_id_from_image_url(image_url: str) -> str:
     parts = image_url.split("/")
-    public_id = parts[-1].split(".")[0]
+    public_id = parts[-1].rsplit(".", 1)[0]
+    public_id = public_id.replace('%40', '@')
     return public_id
 
 
@@ -59,6 +60,7 @@ def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session, curren
     photo_data = photo.dict()
     photo_data["image_url"] = image_url
     photo_data["user_id"] = current_user.id 
+    photo_data["public_id"] = public_id
     db_photo = Photo(**photo_data)
     db.add(db_photo)
     db.commit()
@@ -153,7 +155,7 @@ async def delete_user_photo(photo_id: int, user_id: int, is_admin: bool, db: Ses
     :param db: Session: Database session to use.
     :return: Photo: The deleted photo object.
     """
-    init_cloudinary()
+    
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     
     if not photo:
@@ -164,7 +166,11 @@ async def delete_user_photo(photo_id: int, user_id: int, is_admin: bool, db: Ses
     
     # Видалення фотографії з Cloudinary за її public_id
     public_id = get_public_id_from_image_url(photo.image_url)
+
+    init_cloudinary()
     destroy(public_id)
+    destroy("PhotoshareApp_tr/" + public_id)
+    destroy("PhotoshareApp_tr/" + public_id + '_qr')
 
     db.delete(photo)
     db.commit()
