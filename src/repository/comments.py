@@ -10,9 +10,9 @@ from src.schemas import CommentBase
 
 async def create_comment(photos_id: int,
                          body: CommentBase,
-                         db: Session
+                         db: Session,
+                         user: User
                          ) -> Comment:
-
     """
     The create_comment function creates a new comment in the database.
         Args:
@@ -27,7 +27,7 @@ async def create_comment(photos_id: int,
     :param user: User: Get the user_id from the logged in user
     :return: A comment object
     """
-    new_comment = Comment(text=body.text, photos_id=photos_id)
+    new_comment = Comment(text=body.text, photos_id=photos_id, user_id=user.id)
     db.add(new_comment)
     db.commit()
     db.refresh(new_comment)
@@ -36,9 +36,9 @@ async def create_comment(photos_id: int,
 
 async def edit_comment(comment_id: int,
                        body: CommentBase,
-                       db: Session
+                       db: Session,
+                       user: User
                        ) -> Comment | None:
-
     """
     The edit_comment function allows a user to edit their own comment.
         Args:
@@ -51,9 +51,8 @@ async def edit_comment(comment_id: int,
     :param user: User: Check if the user is an admin, moderator or the author of the comment
     :return: A comment object
     """
-    comment = db.query(Comment).filter(Comment.id == comment_id).first()
+    comment = db.query(Comment).filter(and_(Comment.id == comment_id, Comment.user_id == user.id)).first()
     if comment:
-        #if user.role in [Role.Administrator, Role.Moderator] or comment.user_id == user.id:
         comment.text = body.text
         comment.updated_at = func.now()
         comment.update_status = True
@@ -62,9 +61,9 @@ async def edit_comment(comment_id: int,
 
 
 async def delete_comment(comment_id: int,
-                         db: Session
+                         db: Session,
+                         user: User
                          ) -> None:
-
     """
     The delete_comment function deletes a comment from the database.
         Args:
@@ -85,9 +84,9 @@ async def delete_comment(comment_id: int,
 
 
 async def show_single_comment(comment_id: int,
-                              db: Session
+                              db: Session,
+                              user: User
                               ) -> Comment | None:
-
     """
     The show_single_comment function returns a single comment from the database.
         Args:
@@ -100,13 +99,12 @@ async def show_single_comment(comment_id: int,
     :param user: User: Check if the user is authorized to see the comment
     :return: The comment with the given id, if it exists
     """
-    # return db.query(Comment).filter(and_(Comment.id == comment_id, Comment.user_id == user.id)).first()
-    return db.query(Comment).filter(Comment.id == comment_id).first()
+    return db.query(Comment).filter(and_(Comment.id == comment_id, Comment.user_id == user.id)).first()
 
 
 async def show_user_comments(user_id: int,
-                             db: Session) -> List[Comment] | None:
-
+                             db: Session
+                             ) -> List[Comment] | None:
     """
     The show_user_comments function returns a list of comments made by the user with the given id.
         If no such user exists, it returns None.
@@ -118,10 +116,9 @@ async def show_user_comments(user_id: int,
     return db.query(Comment).filter(Comment.user_id == user_id).all()
 
 
-async def show_user_post_comments(user_id: int,
-                                  photos_id: int,
-                                  db: Session) -> List[Comment] | None:
-
+async def show_user_comments_photo(user_id: int,
+                                   photos_id: int,
+                                   db: Session) -> List[Comment] | None:
     """
     The `show_user_post_comments` function returns a list of comments for a given user and post.
         Args:

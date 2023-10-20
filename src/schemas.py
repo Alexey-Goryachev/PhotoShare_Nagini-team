@@ -152,7 +152,7 @@ class CommentModel(CommentBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    # user_id: int
+    user_id: int
     photos_id: int
     update_status: bool = False
 
