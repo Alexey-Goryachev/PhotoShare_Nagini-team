@@ -10,11 +10,12 @@ from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from cloudinary.uploader import destroy
 from sqlalchemy.orm import Session
-from src.database.models import Photo, User
+from src.database.models import Photo, User, Tag
 from fastapi.exceptions import HTTPException
 from datetime import datetime
 
 from src.conf.config import settings
+from src.repository.tags import create_tag
 
 
 # cloudinary.config(
@@ -39,16 +40,8 @@ def get_public_id_from_image_url(image_url: str) -> str:
     return public_id
 
 
-def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session, current_user: User) -> PhotoResponse:
-    """
-    Create a user's photo, upload it to Cloudinary, and store it in the database.
-
-    :param photo: PhotoCreate: Data for creating a new photo.
-    :param image: UploadFile: The image file to upload.
-    :param db: Session: Database session to use.
-    :param current_user: User: The user creating the photo.
-    :return: PhotoResponse: The created photo response.
-    """
+def create_user_photo(photo: PhotoCreate, image: UploadFile, current_user: User, db: Session) -> PhotoResponse:
+  
     init_cloudinary()
     # Створюю унікальний public_id на основі поточного часу
     timestamp = datetime.now().timestamp()
@@ -61,15 +54,40 @@ def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session, curren
     photo_data["image_url"] = image_url
     photo_data["user_id"] = current_user.id 
     photo_data["public_id"] = public_id
+    
+
+    tag_objects = []
+    for tag_name in photo_data['tags']:
+        tag = db.query(Tag).filter(Tag.title == tag_name).first()
+        if not tag:
+            # Если тег не существует, создайте новый
+            print(tag_name)
+            # tag = await create_tag(str(tag_name), db, current_user)
+            tag = Tag(title=tag_name, user_id=current_user.id)
+            db.add(tag)
+            db.commit()
+            db.refresh(tag)
+        tag_objects.append(tag)
+    print(tag_objects)
+    photo_data['tags'] = tag_objects
     db_photo = Photo(**photo_data)
+    print(db_photo)
+    db_photo.tags = tag_objects
+    # #Связывание фото с тегами
+    # for tag in tag_objects:
+    #     db_photo.tag.append(tag)
+
     db.add(db_photo)
     db.commit()
     db.refresh(db_photo)
-
+    
     photo_response_data = db_photo.__dict__
     photo_response_data.pop("_sa_instance_state", None)
     print(photo_response_data)
     return PhotoResponse(**photo_response_data)
+    # db_photo_dict = db_photo.dict()
+    # print(db_photo_dict)
+    # return PhotoResponse(**db_photo_dict)
 
 
 

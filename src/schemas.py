@@ -8,6 +8,26 @@ from enum import Enum
 from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr, constr, SecretStr
 from pydantic import BaseModel, EmailStr, Field
+from src.database.models import Tag
+
+class TagBase(BaseModel):
+    title: str = Field(max_length=50)
+
+
+class TagModel(TagBase):
+    pass
+
+    class Config:
+        from_attributes = True
+
+
+class TagResponse(TagBase):
+    id: int
+    # user_id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class Role(str, Enum):
@@ -67,6 +87,7 @@ class UserWithPhotos(UserDb):
 
 class PhotoCreate(BaseModel):
     description: str
+    tags: List[str] = []
     #user_id: int 
 
 
@@ -79,6 +100,7 @@ class PhotoResponse(BaseModel):
     image_url: str
     description: str
     created_at: datetime
+    # tags: List[TagResponse]
     #TODO
     # updated_at: datetime
     # # user_id : int
@@ -170,21 +192,3 @@ class CommentUpdate(CommentModel):
 
 # ======
 
-class TagBase(BaseModel):
-    title: str = Field(max_length=50)
-
-
-class TagModel(TagBase):
-    pass
-
-    class Config:
-        from_attributes = True
-
-
-class TagResponse(TagBase):
-    id: int
-    # user_id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True

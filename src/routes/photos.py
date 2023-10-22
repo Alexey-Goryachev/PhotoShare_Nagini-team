@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Form, File, UploadFile
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm, HTTPBearer
@@ -21,7 +22,7 @@ from src.database.db import SessionLocal
 
 # from src.repository.photos import get_all_photos
 from starlette.responses import JSONResponse
-from src.database.models import Photo, User
+from src.database.models import Photo, User, Tag
 from src.repository import photos as repository_photos
 from src.schemas import PhotoTransform, TransformBodyModel, PhotoLinkTransform
 from src.services.photos import transform_image, create_link_transform_image
@@ -35,6 +36,7 @@ security = HTTPBearer()
 async def create_user_photo(
     image: UploadFile = File(...),
     description: str = Form(...),
+    tags: List[str] = Form([]),
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -49,9 +51,24 @@ async def create_user_photo(
     """
     if not current_user:
         raise HTTPException(status_code=401, detail="Authentication required")
+    
+    if len(tags) > 5:
+        raise HTTPException(status_code=400, detail="Too many tags provided")
 
-    photo_data = PhotoCreate(description=description)
-    return repository_photos.create_user_photo(photo_data, image, db, current_user)
+    #Проверка и обработка тегов
+    # tag_objects = []
+    # for tag_name in tags:
+    #     tag = db.query(Tag).filter(Tag.title == tag_name).first()
+    #     if not tag:
+    #         # Если тег не существует, создайте новый
+    #         tag = Tag(title=tag_name, user_id=current_user.id)
+    #         db.add(tag)
+    #         db.commit()
+    #         db.refresh(tag)
+    #     tag_objects.append(tag)
+
+    photo_data = PhotoCreate(description=description, tags=tags)
+    return repository_photos.create_user_photo(photo_data, image, current_user, db)
 
 
 @router.get("/user-photos/", response_model=PhotoListResponse)

@@ -46,7 +46,7 @@ class Photo(Base):
     id = Column(Integer, primary_key=True)
     image_url = Column(String(300))
     description = Column(String(500), nullable=True)
-    tag = relationship('Tag', secondary=photo_2_tag, backref='photos')
+    tags = relationship('Tag', secondary=photo_2_tag, backref='photos')
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now())
     # Зовнішній ключ для зв'язку з користувачем
