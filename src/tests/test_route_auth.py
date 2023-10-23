@@ -3,7 +3,7 @@ from starlette import status
 from starlette.testclient import TestClient
 from src.database.models import User
 from src.database.db import SessionLocal
-from src.authentication.auth import create_access_token
+from src.services.auth import  auth_service 
 from jose import jwt
 
 
@@ -82,7 +82,7 @@ async def test_login(test_client: TestClient, user_data):
     session.close()
 
     # Додавання тесту для перевірки генерації та декодування токена
-    access_token = create_access_token(data={"sub": user_data["email"], "message": "Logged successfully"})
+    access_token = auth_service.create_access_token(data={"sub": user_data["email"], "message": "Logged successfully"})
     assert access_token is not None
 
     # Декодування токена

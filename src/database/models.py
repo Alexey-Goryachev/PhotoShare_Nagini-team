@@ -1,12 +1,8 @@
-from sqlalchemy import Column, Integer, String, Boolean, func, Table, UniqueConstraint, ForeignKey, LargeBinary
-from sqlalchemy import Column, Integer, String, Boolean, func, Table, UniqueConstraint, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, func, Table,Text, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql.sqltypes import Enum
-from fastapi import File, UploadFile
-from typing import List
-from pydantic import BaseModel
 
 
 Base = declarative_base()
@@ -36,17 +32,12 @@ photo_2_tag = Table("photo_2_tag", Base.metadata,
 
 
     
-
-
-
-
-
 class Photo(Base):
     __tablename__ = "photos"
     id = Column(Integer, primary_key=True)
     image_url = Column(String(300))
     description = Column(String(500), nullable=True)
-    tag = relationship('Tag', secondary=photo_2_tag, backref='photos')
+    tags = relationship('Tag', secondary=photo_2_tag, backref='photos')
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now())
     # Зовнішній ключ для зв'язку з користувачем
@@ -77,7 +68,7 @@ class Tag(Base):
     __tablename__ = "tags"
 
     id = Column(Integer, primary_key=True)
-    title = Column(String(25), nullable=False, unique=True)
+    title = Column(String(100), nullable=False, unique=True)
     created_at = Column(DateTime, default=func.now())
     user_id = Column('user_id', ForeignKey('users.id', ondelete='CASCADE'), default=None)
 

@@ -1,13 +1,30 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 from enum import Enum
-from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr, Field
 from typing import List
 from enum import Enum
-from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr, constr, SecretStr
 from pydantic import BaseModel, EmailStr, Field
+
+
+class TagBase(BaseModel):
+    title: str = Field(max_length=50)
+
+
+class TagModel(TagBase):
+    pass
+
+    class Config:
+        from_attributes = True
+
+
+class TagResponse(TagBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 class Role(str, Enum):
@@ -57,7 +74,7 @@ class TokenModel(BaseModel):
 class PhotoBase(BaseModel):
     image_url: str
     description: str
-    #TODO
+    
     image_transform: str
     qr_transform: str
     public_id: str
@@ -67,11 +84,13 @@ class UserWithPhotos(UserDb):
 
 class PhotoCreate(BaseModel):
     description: str
-    #user_id: int 
+    tags: List[str] = []
+    
 
 
 class PhotoUpdate(BaseModel):
     description: str
+    tags: List[str] = []
 
 
 class PhotoResponse(BaseModel):
@@ -79,12 +98,9 @@ class PhotoResponse(BaseModel):
     image_url: str
     description: str
     created_at: datetime
-    #TODO
-    # updated_at: datetime
-    # # user_id : int
-    # image_transform: str
-    # qr_transform: str
-    # public_id: str
+    updated_at: datetime
+    tags: List[TagResponse]
+    
 
 class PhotoListResponse(BaseModel):
     photos: List[PhotoResponse]
@@ -95,7 +111,6 @@ class PhotoListResponse(BaseModel):
 class PhotoTransform(BaseModel): 
     id: int
     image_transform: str
-    # qr_transform: str
     detail: str = "Image successfully transform"
 
 class PhotoLinkTransform(BaseModel):
@@ -170,21 +185,3 @@ class CommentUpdate(CommentModel):
 
 # ======
 
-class TagBase(BaseModel):
-    title: str = Field(max_length=50)
-
-
-class TagModel(TagBase):
-    pass
-
-    class Config:
-        from_attributes = True
-
-
-class TagResponse(TagBase):
-    id: int
-    # user_id: int
-    created_at: datetime
-
-    class Config:
-        from_attributes = True

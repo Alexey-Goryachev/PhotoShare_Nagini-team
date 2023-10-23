@@ -3,8 +3,8 @@ from typing import List
 from fastapi import Depends, HTTPException, status, Request
 
 from src.database.models import User
-from src.schemas import Role
-from src.authentication.auth import auth_service
+from src.schemas.schemas import Role
+from src.services.auth import auth_service
 
 
 class RoleChecker:

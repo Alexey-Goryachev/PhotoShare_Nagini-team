@@ -1,27 +1,15 @@
-from src.schemas import PhotoResponse
+from datetime import datetime
 from sqlalchemy.orm import Session
-from src.schemas import PhotoCreate, PhotoUpdate, PhotoListResponse
 from fastapi import UploadFile
-from src.utils import upload_file
-from src.database.db import SessionLocal
-from typing import List
 import cloudinary
 from cloudinary.uploader import upload
-from cloudinary.utils import cloudinary_url
 from cloudinary.uploader import destroy
 from sqlalchemy.orm import Session
-from src.database.models import Photo, User
 from fastapi.exceptions import HTTPException
-from datetime import datetime
 
+from src.database.models import Photo, User, Tag
 from src.conf.config import settings
-
-
-# cloudinary.config(
-#     cloud_name="dpqnfhenr",
-#     api_key="679423711358256",
-#     api_secret="qWDJar70AfWF-iGLiKw64EOPxKI"
-# )
+from src.schemas.schemas import PhotoCreate, PhotoUpdate, PhotoListResponse, TagResponse, PhotoResponse
 
 
 def init_cloudinary():
@@ -39,16 +27,8 @@ def get_public_id_from_image_url(image_url: str) -> str:
     return public_id
 
 
-def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session, current_user: User) -> PhotoResponse:
-    """
-    Create a user's photo, upload it to Cloudinary, and store it in the database.
-
-    :param photo: PhotoCreate: Data for creating a new photo.
-    :param image: UploadFile: The image file to upload.
-    :param db: Session: Database session to use.
-    :param current_user: User: The user creating the photo.
-    :return: PhotoResponse: The created photo response.
-    """
+def create_user_photo(photo: PhotoCreate, image: UploadFile, current_user: User, db: Session) -> PhotoResponse:
+  
     init_cloudinary()
     # Створюю унікальний public_id на основі поточного часу
     timestamp = datetime.now().timestamp()
@@ -61,28 +41,37 @@ def create_user_photo(photo: PhotoCreate, image: UploadFile, db: Session, curren
     photo_data["image_url"] = image_url
     photo_data["user_id"] = current_user.id 
     photo_data["public_id"] = public_id
+    
+    tag_titles = [tag.strip() for tag in photo_data['tags'][0].split(",") if tag.strip()]
+    if len(tag_titles) > 5:
+        raise HTTPException(status_code=400, detail="Too many tags provided")
+    tag_objects = []
+    for tag_name in tag_titles:
+        tag = db.query(Tag).filter(Tag.title == tag_name).first()
+        if not tag:
+            tag = Tag(title=tag_name, user_id=current_user.id)
+            db.add(tag)
+            db.commit()
+            db.refresh(tag)
+        tag_objects.append(tag)
+    photo_data['tags'] = tag_objects
     db_photo = Photo(**photo_data)
+    db_photo.tags = tag_objects
+
+
     db.add(db_photo)
     db.commit()
     db.refresh(db_photo)
 
+    
     photo_response_data = db_photo.__dict__
+    photo_response_data["tags"] = [TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in db_photo.tags]
     photo_response_data.pop("_sa_instance_state", None)
-    print(photo_response_data)
+
     return PhotoResponse(**photo_response_data)
-
-
+   
 
 def get_user_photos(user_id: int, skip: int, limit: int, db: Session) -> PhotoListResponse:
-    """
-    Get user photos with optional filtering and pagination.
-
-    :param user_id: int: (Optional) User ID for filtering photos by user.
-    :param skip: int: Number of photos to skip.
-    :param limit: int: Maximum number of photos to return.
-    :param db: Session: Database session to use.
-    :return: PhotoListResponse: List of photo responses.
-    """
 
     photos_query = db.query(Photo)
     # Якщо user_id має значення None, не фільтруємо за user_id
@@ -94,7 +83,9 @@ def get_user_photos(user_id: int, skip: int, limit: int, db: Session) -> PhotoLi
         id=photo.id,
         image_url=photo.image_url,
         description=photo.description,
-        created_at=photo.created_at
+        created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     ) for photo in photos]
 
 
@@ -113,7 +104,9 @@ def get_user_photo_by_id(photo_id: int, db: Session, current_user: User) -> Phot
         id=photo.id,
         image_url=photo.image_url,
         description=photo.description,
-        created_at=photo.created_at
+        created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     )
 
 
@@ -123,38 +116,36 @@ def get_user_photo_by_id(photo_id: int, db: Session) -> Photo:
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     return photo
 
-def update_user_photo(photo: Photo, updated_photo: PhotoUpdate, db: Session) -> PhotoResponse:
-    """
-    Update a user's photo description.
-
-    :param photo: Photo: The photo to update.
-    :param updated_photo: PhotoUpdate: Data for updating the photo.
-    :param db: Session: Database session to use.
-    :return: PhotoResponse: The updated photo response.
-    """
+def update_user_photo(photo: Photo, updated_photo: PhotoUpdate, current_user: User, db: Session) -> PhotoResponse:
+  
     if updated_photo.description is not None:
         photo.description = updated_photo.description
+
+    if updated_photo.tags:
+        tag_objects = []
+        for tag_name in updated_photo.tags:
+            tag = db.query(Tag).filter(Tag.title == tag_name,).first()
+            if not tag:
+                tag = Tag(title=tag_name, user_id=current_user.id)
+                db.add(tag)
+            tag_objects.append(tag)
+        photo.tags = tag_objects
+
     photo.updated_at = datetime.utcnow()  # Оновлення поля updated_at
     db.commit()
     return PhotoResponse(
         id=photo.id,
         image_url=photo.image_url,
         description=photo.description,
-        created_at=photo.created_at
+        created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     )
 
 
 
 async def delete_user_photo(photo_id: int, user_id: int, is_admin: bool, db: Session):
-    """
-    Delete a user's photo, with access control for administrators and owners.
-
-    :param photo_id: int: ID of the photo to delete.
-    :param user_id: int: ID of the user requesting the delete.
-    :param is_admin: bool: Indicates if the requester is an administrator.
-    :param db: Session: Database session to use.
-    :return: Photo: The deleted photo object.
-    """
+   
     
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     

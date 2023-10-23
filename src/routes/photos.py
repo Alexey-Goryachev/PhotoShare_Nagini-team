@@ -1,31 +1,24 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status, Form, File, UploadFile
 from sqlalchemy.orm import Session
-from fastapi.security import OAuth2PasswordRequestForm, HTTPBearer
+from fastapi.security import  HTTPBearer
 from src.database.models import User, Photo
-from src.schemas import (
-    UserModel,
+from src.schemas.schemas import (
     PhotoCreate,
     PhotoUpdate,
     PhotoResponse,
     PhotoListResponse,
+    TagResponse, PhotoTransform, TransformBodyModel, PhotoLinkTransform
 )
-from src.authentication.auth import auth_service
-from src.repository import users as repository_users
+from src.services.auth import auth_service
 from src.repository import photos as repository_photos
 from src.database.db import get_db
-
-
-from src.schemas import PhotoCreate, PhotoResponse, PhotoListResponse, PhotoUpdate
 from src.repository import photos as repository_photos
-from src.database.db import SessionLocal
 
-# from src.repository.photos import get_all_photos
-from starlette.responses import JSONResponse
 from src.database.models import Photo, User
 from src.repository import photos as repository_photos
-from src.schemas import PhotoTransform, TransformBodyModel, PhotoLinkTransform
 from src.services.photos import transform_image, create_link_transform_image
-from src.authentication.auth import auth_service
+from src.services.auth import auth_service
 
 router = APIRouter(prefix="/photos", tags=["photos"])
 security = HTTPBearer()
@@ -35,26 +28,22 @@ security = HTTPBearer()
 async def create_user_photo(
     image: UploadFile = File(...),
     description: str = Form(...),
+    tags: List[str] = Form([]),
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    **Create a new user photo🐍**\n
-    ___
-    - **:param**🪄 `image`: UploadFile: The image to upload.\n
-    - **:param**🪄 `description`: str: The description of the photo.\n
-    - **:param**🪄 `current_user`: User: The currently authenticated user.\n
-    - **:param**🪄 `db`: Session: The database session.\n
-    :return: PhotoResponse: The created photo response.
-    """
     if not current_user:
         raise HTTPException(status_code=401, detail="Authentication required")
+    
+    if len(tags) > 5:
+        raise HTTPException(status_code=400, detail="Too many tags provided")
 
-    photo_data = PhotoCreate(description=description)
-    return repository_photos.create_user_photo(photo_data, image, db, current_user)
+   
+    photo_data = PhotoCreate(description=description, tags=tags)
+    return repository_photos.create_user_photo(photo_data, image, current_user, db)
 
 
-@router.get("/user-photos/", response_model=PhotoListResponse)
+@router.get("/", response_model=PhotoListResponse)
 async def get_user_photos(
     skip: int = 0,
     limit: int = 10,
@@ -79,7 +68,7 @@ async def get_user_photos(
     return {"photos": photos}
 
 
-@router.get("/user-photos/{photo_id}", response_model=PhotoResponse)
+@router.get("/{photo_id}", response_model=PhotoResponse)
 async def get_user_photo_by_id(
     photo_id: int,
     current_user: User = Depends(auth_service.get_current_user),
@@ -114,10 +103,12 @@ async def get_user_photo_by_id(
         image_url=photo.image_url,
         description=photo.description,
         created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     )
 
 
-@router.put("/user-photos/{photo_id}", response_model=PhotoResponse)
+@router.put("/{photo_id}", response_model=PhotoResponse)
 async def update_user_photo(
     photo_id: int,
     updated_photo: PhotoUpdate,
@@ -147,11 +138,11 @@ async def update_user_photo(
     ):
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    updated_photo = repository_photos.update_user_photo(photo, updated_photo, db)
+    updated_photo = repository_photos.update_user_photo(photo, updated_photo, current_user, db)
     return updated_photo
 
 
-@router.delete("/user-photos/{photo_id}", response_model=PhotoResponse)
+@router.delete("/{photo_id}", response_model=PhotoResponse)
 async def delete_user_photo(
     photo_id: int,
     current_user: User = Depends(auth_service.get_current_user),
@@ -186,6 +177,8 @@ async def delete_user_photo(
         "image_url": result.image_url,
         "description": result.description,
         "created_at": result.created_at,
+        "updated_at": result.updated_at,
+        "tags": result.tags
     }
 
     return response_data
