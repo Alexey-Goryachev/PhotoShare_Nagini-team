@@ -12,7 +12,18 @@ from src.repository.photos import init_cloudinary
 
 
 async def transform_image(photo_id: int, body: TransformBodyModel, user: User, db: Session ) -> Photo | None:
+    """
+    The transform_image function takes in a photo_id, body, user and db.
+    It then initializes the cloudinary library. It queries the database for a photo with that id and user_id.
+    If it finds one it creates an empty list called transformation to store all of our transformations in as dictionaries. 
+    Then we check if each filter is being used by checking if its use_filter attribute is True or False (True meaning that we want to apply this filter). If so, we append the appropriate dictionary into our transformation list using either a single line or multiple lines depending on how many filters are being applied at once.
     
+    :param photo_id: int: Identify the photo that is to be transformed
+    :param body: TransformBodyModel: Get the data from the request body
+    :param user: User: Check if the user is logged in and has access to the photo
+    :param db: Session: Query the database for a photo with the id and user_id specified in the function
+    :return: The image_transform url
+    """
     init_cloudinary()
     photo = db.query(Photo).filter(and_(Photo.id == photo_id, Photo.user_id == user.id)).first()
     if photo:
@@ -67,7 +78,18 @@ async def transform_image(photo_id: int, body: TransformBodyModel, user: User, d
             return photo
         
 async def create_link_transform_image(photo_id: int, user: User, db: Session) -> str | None:
-
+    """
+    The create_link_transform_image function takes in a photo_id, user and db as parameters.
+    It then initializes the cloudinary library. It then queries the database for a photo with 
+    the given id and user_id. If it finds one, it creates a QR code from that image's transform url 
+    and uploads it to Cloudinary using its public id + '_qr' as its name (e.g., if the public id is &quot;abc&quot;, 
+    then this function will upload an image named &quot;abc_qr&quot;). The function returns None if no such photo exists.
+    
+    :param photo_id: int: Specify the photo that you want to transform
+    :param user: User: Get the user id of the user who is logged in
+    :param db: Session: Access the database
+    :return: A dictionary with the image_transform and qr_transform keys
+    """
     init_cloudinary()
     photo = db.query(Photo).filter(and_(Photo.id == photo_id, Photo.user_id == user.id)).first()
     if photo:

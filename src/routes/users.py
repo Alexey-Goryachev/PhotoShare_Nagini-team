@@ -13,6 +13,16 @@ router = APIRouter(prefix='/users', tags=["users"])
 
 # Рахуємо фото
 def get_user_photos_count(user_id: int, db: Session) -> int:
+    """
+    **The `get_user_photos_count` function returns the number of photos for a given user.
+        **Args:**
+            `user_id (int):` The id of the user to get photos count for.
+            `db (Session):` A database session object. 🏰**
+    
+    - **:param**🧹 `user_id:` `int:` Specify the user whose photos we want to count
+    - **:param**🧹 `db:` `Session:` Get access to the database
+    **:return:** The number of photos for a user
+    """
     # Отримуємо кількість фотографій для користувача
     photos_count = db.query(Photo).filter(Photo.user_id == user_id).count()
     return photos_count
@@ -26,6 +36,14 @@ async def read_users_me(
     current_user: UserDb = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    **The `read_users_me` function returns the current user's information.🔮**
+    
+    - **:param**🪄 `current_user:` `UserDb:` Get the current user from the database
+    - **:param**🪄 `db:` `Session:` Access the database
+    - **:param**🪄 : Get the current user from the database
+    **:return:** A userdb object
+    """
     # Отримуємо кількість фотографій для поточного користувача
     photos_count = get_user_photos_count(current_user.id, db)
 
@@ -42,6 +60,17 @@ async def edit_user_profile(
     current_user: UserDb = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    **The `edit_user_profile` function allows the user to change their email, username and password.
+        The function takes in a UserUpdate object which contains the new values for each of these fields.
+        If any of these fields are not provided, they will remain unchanged.🐍**
+    
+    - **:param**✉ `user_update:` `UserUpdate:` Get the data that the user wants to change
+    - **:param**✉ `current_user:` `UserDb:` Get the user who is currently logged in
+    - **:param**✉ `db:` `Session:` Access the database
+    - **:param**✉ : Get the current user from the database
+    **:return:**✉ A dictionary with the message key and the data changed successfully value
+    """
     # Отримуємо інформацію про користувача з бази даних
     user = await repository_users.get_user_by_id(current_user.id, db)
 

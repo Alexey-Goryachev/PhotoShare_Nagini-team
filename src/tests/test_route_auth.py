@@ -9,6 +9,15 @@ from jose import jwt
 
 @pytest.mark.asyncio
 async def test_signup(test_client: TestClient, user_data):
+    """
+    The test_signup function tests the signup endpoint.
+    It does so by sending a POST request to /auth/signup with user_data as JSON data.
+    The response is then checked for status code 201 and the presence of certain keys in its JSON body.
+    
+    :param test_client: TestClient: Pass in the test client that is created by pytest-asyncio
+    :param user_data: Pass the data to the test_client
+    :return: A response object
+    """
     response = test_client.post("/auth/auth/signup", json=user_data)
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -19,6 +28,14 @@ async def test_signup(test_client: TestClient, user_data):
 
 @pytest.mark.asyncio
 async def test_signup_invalid_email(test_client: TestClient, user_data):
+    """
+    The test_signup_invalid_email function tests the signup endpoint with an invalid email.
+    It should return a 422 Unprocessable Entity status code and a helpful error message.
+    
+    :param test_client: TestClient: Make requests to the api
+    :param user_data: Pass the user data to the function
+    :return: A response with a status code 422 and an error message
+    """
     invalid_user = user_data.copy()
     invalid_user["email"] = "invalid_email"
 
@@ -30,6 +47,16 @@ async def test_signup_invalid_email(test_client: TestClient, user_data):
 
 @pytest.mark.asyncio
 async def test_signup_existing_user(test_client: TestClient, user_data):
+    """
+    The test_signup_existing_user function tests the following:
+        1. The user is not registered in the system.
+        2. The user is registered in the system.
+    
+    :param test_client: TestClient: Make requests to the api
+    :param user_data: Pass the data to the function
+    :return: The following:
+    """
+    
     response = test_client.post("/auth/auth/signup", json=user_data)
     assert response.status_code == status.HTTP_409_CONFLICT
 
@@ -45,6 +72,14 @@ async def test_signup_existing_user(test_client: TestClient, user_data):
 
 @pytest.mark.asyncio
 async def test_signup_invalid_role(test_client: TestClient, user_data):
+    """
+    The test_signup_invalid_role function tests the signup endpoint with an invalid role.
+        It should return a 409 Conflict response.
+    
+    :param test_client: TestClient: Make requests to the api
+    :param user_data: Pass the user data to the test function
+    :return: The following:
+    """
     invalid_user = user_data.copy()
     invalid_user["roles"] = ["InvalidRole"]
 
@@ -57,6 +92,15 @@ async def test_signup_invalid_role(test_client: TestClient, user_data):
 
 @pytest.mark.asyncio
 async def test_login(test_client: TestClient, user_data):
+    """
+    The test_login function tests the login functionality of the application.
+    It does so by creating a user, logging in with that user's credentials, and then verifying that an access token was returned.
+    
+    
+    :param test_client: TestClient: Create a test client that will be used to make requests to the api
+    :param user_data: Pass the data to the test function
+    :return: The following error:
+    """
     session = SessionLocal()
     user_data["roles"] = "User"
     user = User(**user_data)
@@ -92,6 +136,14 @@ async def test_login(test_client: TestClient, user_data):
 
 @pytest.mark.asyncio
 async def test_login_invalid_credentials(test_client: TestClient, user_data):
+    """
+    The test_login_invalid_credentials function tests the login endpoint with invalid credentials.
+        It should return a 401 Unauthorized response.
+    
+    :param test_client: TestClient: Make requests to the api
+    :param user_data: Pass the user data to the test function
+    :return: The following:
+    """
     # Логін з хибними даними
     invalid_login_data = {"username": user_data["username"], "password": "invalid_password"}
     response = test_client.post("/auth/auth/login", data=invalid_login_data)
