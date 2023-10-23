@@ -16,7 +16,7 @@ from src.repository import photos as repository_photos
 from src.database.db import get_db
 
 
-from src.schemas import PhotoCreate, PhotoResponse, PhotoListResponse, PhotoUpdate
+from src.schemas import PhotoCreate, PhotoResponse, PhotoListResponse, PhotoUpdate, TagResponse
 from src.repository import photos as repository_photos
 from src.database.db import SessionLocal
 
@@ -40,33 +40,13 @@ async def create_user_photo(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    **Create a new user photo🐍**\n
-    ___
-    - **:param**🪄 `image`: UploadFile: The image to upload.\n
-    - **:param**🪄 `description`: str: The description of the photo.\n
-    - **:param**🪄 `current_user`: User: The currently authenticated user.\n
-    - **:param**🪄 `db`: Session: The database session.\n
-    :return: PhotoResponse: The created photo response.
-    """
     if not current_user:
         raise HTTPException(status_code=401, detail="Authentication required")
     
     if len(tags) > 5:
         raise HTTPException(status_code=400, detail="Too many tags provided")
 
-    #Проверка и обработка тегов
-    # tag_objects = []
-    # for tag_name in tags:
-    #     tag = db.query(Tag).filter(Tag.title == tag_name).first()
-    #     if not tag:
-    #         # Если тег не существует, создайте новый
-    #         tag = Tag(title=tag_name, user_id=current_user.id)
-    #         db.add(tag)
-    #         db.commit()
-    #         db.refresh(tag)
-    #     tag_objects.append(tag)
-
+   
     photo_data = PhotoCreate(description=description, tags=tags)
     return repository_photos.create_user_photo(photo_data, image, current_user, db)
 
@@ -131,6 +111,8 @@ async def get_user_photo_by_id(
         image_url=photo.image_url,
         description=photo.description,
         created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     )
 
 
@@ -164,7 +146,7 @@ async def update_user_photo(
     ):
         raise HTTPException(status_code=403, detail="Permission denied")
 
-    updated_photo = repository_photos.update_user_photo(photo, updated_photo, db)
+    updated_photo = repository_photos.update_user_photo(photo, updated_photo, current_user, db)
     return updated_photo
 
 
@@ -203,6 +185,8 @@ async def delete_user_photo(
         "image_url": result.image_url,
         "description": result.description,
         "created_at": result.created_at,
+        "updated_at": result.updated_at,
+        "tags": result.tags
     }
 
     return response_data

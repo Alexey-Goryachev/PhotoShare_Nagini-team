@@ -93,6 +93,7 @@ class PhotoCreate(BaseModel):
 
 class PhotoUpdate(BaseModel):
     description: str
+    tags: List[str] = []
 
 
 class PhotoResponse(BaseModel):
@@ -100,7 +101,8 @@ class PhotoResponse(BaseModel):
     image_url: str
     description: str
     created_at: datetime
-    # tags: List[TagResponse]
+    updated_at: datetime
+    tags: List[TagResponse]
     #TODO
     # updated_at: datetime
     # # user_id : int

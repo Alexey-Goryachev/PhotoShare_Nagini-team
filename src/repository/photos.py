@@ -1,6 +1,6 @@
 from src.schemas import PhotoResponse
 from sqlalchemy.orm import Session
-from src.schemas import PhotoCreate, PhotoUpdate, PhotoListResponse
+from src.schemas import PhotoCreate, PhotoUpdate, PhotoListResponse, TagResponse
 from fastapi import UploadFile
 from src.utils import upload_file
 from src.database.db import SessionLocal
@@ -55,41 +55,34 @@ def create_user_photo(photo: PhotoCreate, image: UploadFile, current_user: User,
     photo_data["user_id"] = current_user.id 
     photo_data["public_id"] = public_id
     
-
+    tag_titles = [tag.strip() for tag in photo_data['tags'][0].split(",") if tag.strip()]
+    if len(tag_titles) > 5:
+        raise HTTPException(status_code=400, detail="Too many tags provided")
     tag_objects = []
-    for tag_name in photo_data['tags']:
+    for tag_name in tag_titles:
         tag = db.query(Tag).filter(Tag.title == tag_name).first()
         if not tag:
-            # Если тег не существует, создайте новый
-            print(tag_name)
-            # tag = await create_tag(str(tag_name), db, current_user)
             tag = Tag(title=tag_name, user_id=current_user.id)
             db.add(tag)
             db.commit()
             db.refresh(tag)
         tag_objects.append(tag)
-    print(tag_objects)
     photo_data['tags'] = tag_objects
     db_photo = Photo(**photo_data)
-    print(db_photo)
     db_photo.tags = tag_objects
-    # #Связывание фото с тегами
-    # for tag in tag_objects:
-    #     db_photo.tag.append(tag)
+
 
     db.add(db_photo)
     db.commit()
     db.refresh(db_photo)
-    
+
+    # db_photo = db.query(Photo).filter_by(id=db_photo.id).first()
     photo_response_data = db_photo.__dict__
+    photo_response_data["tags"] = [TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in db_photo.tags]
     photo_response_data.pop("_sa_instance_state", None)
-    print(photo_response_data)
+    # photo_response_data["tags"] = [TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in db_photo.tags]
     return PhotoResponse(**photo_response_data)
-    # db_photo_dict = db_photo.dict()
-    # print(db_photo_dict)
-    # return PhotoResponse(**db_photo_dict)
-
-
+   
 
 def get_user_photos(user_id: int, skip: int, limit: int, db: Session) -> PhotoListResponse:
     """
@@ -112,7 +105,9 @@ def get_user_photos(user_id: int, skip: int, limit: int, db: Session) -> PhotoLi
         id=photo.id,
         image_url=photo.image_url,
         description=photo.description,
-        created_at=photo.created_at
+        created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     ) for photo in photos]
 
 
@@ -131,7 +126,9 @@ def get_user_photo_by_id(photo_id: int, db: Session, current_user: User) -> Phot
         id=photo.id,
         image_url=photo.image_url,
         description=photo.description,
-        created_at=photo.created_at
+        created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     )
 
 
@@ -141,7 +138,7 @@ def get_user_photo_by_id(photo_id: int, db: Session) -> Photo:
     photo = db.query(Photo).filter(Photo.id == photo_id).first()
     return photo
 
-def update_user_photo(photo: Photo, updated_photo: PhotoUpdate, db: Session) -> PhotoResponse:
+def update_user_photo(photo: Photo, updated_photo: PhotoUpdate, current_user: User, db: Session) -> PhotoResponse:
     """
     Update a user's photo description.
 
@@ -152,13 +149,26 @@ def update_user_photo(photo: Photo, updated_photo: PhotoUpdate, db: Session) -> 
     """
     if updated_photo.description is not None:
         photo.description = updated_photo.description
+
+    if updated_photo.tags:
+        tag_objects = []
+        for tag_name in updated_photo.tags:
+            tag = db.query(Tag).filter(Tag.title == tag_name,).first()
+            if not tag:
+                tag = Tag(title=tag_name, user_id=current_user.id)
+                db.add(tag)
+            tag_objects.append(tag)
+        photo.tags = tag_objects
+
     photo.updated_at = datetime.utcnow()  # Оновлення поля updated_at
     db.commit()
     return PhotoResponse(
         id=photo.id,
         image_url=photo.image_url,
         description=photo.description,
-        created_at=photo.created_at
+        created_at=photo.created_at,
+        updated_at=photo.updated_at,
+        tags=[TagResponse(id=tag.id, title=tag.title, created_at=tag.created_at) for tag in photo.tags]
     )
 
 
