@@ -5,12 +5,11 @@ from sqlalchemy.orm import Session
 from src.conf import messages as message
 
 from src.database.db import get_db
-from src.schemas import TagBase, TagResponse
+from src.schemas.schemas import TagBase, TagResponse, Role
 from src.repository import tags as repository_tags
 from src.database.models import User, Tag
 from src.services.roles import RoleChecker
-from src.schemas import Role
-from src.authentication.auth import auth_service
+from src.services.auth import auth_service
 
 router = APIRouter(prefix='/tags', tags=["tags"])
 

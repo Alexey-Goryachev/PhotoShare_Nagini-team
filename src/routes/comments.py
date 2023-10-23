@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from src.database.db import get_db
-from src.schemas import CommentBase, CommentUpdate, CommentModel
+from src.schemas.schemas import CommentBase, CommentUpdate, CommentModel
 from src.repository import comments as repository_comments
-from src.authentication.auth import auth_service
+from src.services.auth import auth_service
 from src.conf import messages as message
 from src.services.roles import RoleChecker
 from src.database.models import User
-from src.schemas import Role
+from src.schemas.schemas import Role
 
 router = APIRouter(prefix='/comments', tags=["comments"])
 

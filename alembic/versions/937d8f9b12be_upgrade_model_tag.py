@@ -1,8 +1,8 @@
-"""Added Image_transform column
+"""'upgrade_model_tag'
 
-Revision ID: 60c79cdcc9f6
+Revision ID: 937d8f9b12be
 Revises: 
-Create Date: 2023-10-20 15:08:37.277092
+Create Date: 2023-10-23 16:07:41.869550
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '60c79cdcc9f6'
+revision: str = '937d8f9b12be'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -46,7 +46,7 @@ def upgrade() -> None:
     )
     op.create_table('tags',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=25), nullable=False),
+    sa.Column('title', sa.String(length=100), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),

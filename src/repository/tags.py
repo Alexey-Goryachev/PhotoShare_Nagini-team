@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from src.database.models import Tag, User, Photo
-from src.schemas import TagBase
+from src.schemas.schemas import TagBase
 
 
 async def create_tag(body: TagBase,

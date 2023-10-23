@@ -1,15 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends, status, Security
-from fastapi.security import OAuth2PasswordRequestForm, HTTPAuthorizationCredentials, HTTPBearer
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from typing import Dict
 from src.database.db import get_db
 from src.database import models
 from src.database.models import User, Photo
 from src.repository.photos import get_user_photos
-from src.schemas import UserModel, UserResponse, TokenModel, UserDb, UserUpdate, UserWithPhotos
+from src.schemas.schemas import UserDb, UserUpdate
 from src.repository import users as repository_users
-from src.authentication.auth import auth_service
+from src.services.auth import auth_service
 
 router = APIRouter(prefix='/users', tags=["users"])
 

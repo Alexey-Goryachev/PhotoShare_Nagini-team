@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from main import app
 from src.database.db import SessionLocal
-from src.schemas import PhotoCreate, PhotoUpdate
+from src.schemas.schemas import PhotoCreate, PhotoUpdate
 
 
 @pytest.fixture

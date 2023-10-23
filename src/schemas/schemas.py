@@ -1,14 +1,12 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import List
 from enum import Enum
-from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr, Field
 from typing import List
 from enum import Enum
-from fastapi import UploadFile
 from pydantic import BaseModel, EmailStr, constr, SecretStr
 from pydantic import BaseModel, EmailStr, Field
-from src.database.models import Tag
+
 
 class TagBase(BaseModel):
     title: str = Field(max_length=50)
@@ -23,7 +21,6 @@ class TagModel(TagBase):
 
 class TagResponse(TagBase):
     id: int
-    # user_id: int
     created_at: datetime
 
     class Config:
@@ -77,7 +74,7 @@ class TokenModel(BaseModel):
 class PhotoBase(BaseModel):
     image_url: str
     description: str
-    #TODO
+    
     image_transform: str
     qr_transform: str
     public_id: str
@@ -88,7 +85,7 @@ class UserWithPhotos(UserDb):
 class PhotoCreate(BaseModel):
     description: str
     tags: List[str] = []
-    #user_id: int 
+    
 
 
 class PhotoUpdate(BaseModel):
@@ -103,12 +100,7 @@ class PhotoResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     tags: List[TagResponse]
-    #TODO
-    # updated_at: datetime
-    # # user_id : int
-    # image_transform: str
-    # qr_transform: str
-    # public_id: str
+    
 
 class PhotoListResponse(BaseModel):
     photos: List[PhotoResponse]
@@ -119,7 +111,6 @@ class PhotoListResponse(BaseModel):
 class PhotoTransform(BaseModel): 
     id: int
     image_transform: str
-    # qr_transform: str
     detail: str = "Image successfully transform"
 
 class PhotoLinkTransform(BaseModel):
