@@ -8,7 +8,7 @@ from src.schemas.schemas import UserModel, UserResponse, TokenModel, UserDb
 from src.repository import users as repository_users
 from src.services.auth import auth_service
 
-router = APIRouter(prefix='/auth', tags=["auth"])
+router = APIRouter(tags=["auth"])
 security = HTTPBearer()
 
 #Реєстрація

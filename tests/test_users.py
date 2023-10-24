@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from starlette import status
 
-from conftest import test_client, user_data
+from tests.conftest import test_client , user_data
 import logging
 from src.database import db
 from src.database.db import get_db
@@ -22,7 +22,7 @@ def test_signup_login_read_users_me(test_client, user_data):
     # Реєстрація нового користувача
     response_signup = test_client.post("/api/auth/signup", json=user_data)
     logging.debug(f"Response after signup: {response_signup.json()}")
-    assert response_signup.status_code == 201 # Очікуємо успіх
+    assert response_signup.status_code == 201  # Очікуємо успіх
 
     # Повторна реєстрація того ж самого користувача
     response = test_client.post("/api/auth/signup", json=user_data)

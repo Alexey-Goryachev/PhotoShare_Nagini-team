@@ -9,7 +9,7 @@ from src.schemas.schemas import UserDb, UserUpdate, AdminUserPatch
 from src.repository import users as repository_users
 from src.services.auth import auth_service
 
-router = APIRouter(prefix='/users', tags=["users"])
+router = APIRouter(tags=["users"])
 
 # Рахуємо фото
 def get_user_photos_count(user_id: int, db: Session) -> int:
