@@ -32,6 +32,21 @@ async def create_user_photo(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    **The `create_user_photo` function creates a new photo for the current user.**
+        **The function takes in an image file, description and tags as parameters.**
+        **It then uses the `repository_photos` module to create a new photo object with these parameters and store it in the database.🌕**
+    
+    ____
+    
+    - **:param**🗞 `image:` `UploadFile:` Get the image file from the request\n
+    - **:param**🗞 `description:` `str:` Get the description of the photo from the request body\n
+    - **:param**🗞 `tags:` `List[str]:` Get the list of tags from the request body\n
+    - **:param**🗞 `current_user:` `User:` Get the user that is currently logged in\n
+    - **:param**🗞 `db:` `Session:` Pass the database session to the repository layer\n
+    - **:param**🗞 : Get the current user from the database\n
+    **:return:** A photo object
+    """
     if not current_user:
         raise HTTPException(status_code=401, detail="Authentication required")
     
@@ -57,7 +72,7 @@ async def get_user_photos(
     - **:param**⚡ `limit`: int: Maximum number of photos to return.\n
     - **:param**⚡ `db`: Session: The database session.\n
     - **:param**⚡ `current_user`: User: The currently authenticated user.\n
-    :return: PhotoListResponse: List of photo responses.
+    **:return:** PhotoListResponse: List of photo responses.
     """
     if "Administrator" in current_user.roles:
         user_id = None  # Адміністратор має доступ до фотографій будь-якого користувача
@@ -76,11 +91,12 @@ async def get_user_photo_by_id(
 ):
     """
     **Get a user photo by ID🪶**\n
-
+    ____
+    
     - **:param**🧹 `photo_id`: int: ID of the photo to retrieve.\n
     - **:param**🧹 `current_user`: User: The currently authenticated user.\n
     - **:param**🧹 `db`: Session: The database session.\n
-    :return: PhotoResponse: The requested photo response.\n
+    **:return:** PhotoResponse: The requested photo response.\n
     """
     if "Administrator" in current_user.roles.split(","):
         user_id = None  # Адміністратор має доступ до фотографій будь-якого користувача
@@ -117,12 +133,13 @@ async def update_user_photo(
 ):
     """
     **Update a user's photo description🦉**\n
-
+    ____
+    
     - **:param**⚯ `photo_id`: int: ID of the photo to update.\n
     - **:param**⚯ `updated_photo`: PhotoUpdate: Data for updating the photo.\n
     - **:param**⚯ `current_user`: User: The currently authenticated user.\n
     - **:param**⚯ `db`: Session: The database session.\n
-    :return: PhotoResponse: The updated photo response.
+    **:return:** PhotoResponse: The updated photo response.
     """
     photo = repository_photos.get_user_photo_by_id(photo_id, db)
 
@@ -150,11 +167,12 @@ async def delete_user_photo(
 ):
     """
     **Delete a user's photo with access control for administrators and owners🧙🏻‍♂️**\n
-
+    ____
+    
     - **:param**🧹 `photo_id`: int: ID of the photo to delete.**\n
     - **:param**🧹 `current_user`: User: The currently authenticated user.**\n
     - **:param**🧹 `db`: Session: The database session.**\n
-    :return: PhotoResponse: The deleted photo response.
+    **:return:** PhotoResponse: The deleted photo response.
     """
     if not current_user:
         raise HTTPException(
@@ -191,6 +209,22 @@ async def photo_transformation(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    **The photo_transformation function is used to transform the image.🦌**\n
+        The transformation can be:\n
+            - rotate
+            - resize
+            - crop  
+    ____
+    
+    - **:param**✨ `photo_id:` `int:` Get the photo id from the url\n
+    - **:param**✨ `body:` `TransformBodyModel:` Get the data from the request body\n
+    - **:param**✨ `current_user:` `User:` Get the current user from the database\n
+    - **:param**✨ `db:` `Session:` Get access to the database\n
+    - **:param**✨ : Get the id of the photo that you want to transform\n
+    **:return:** A dictionary with the keys: `id`, `image_transform` and detail
+    """
+    
     photo = await transform_image(photo_id, body, current_user, db)
     if photo is None:
         raise HTTPException(
@@ -214,6 +248,19 @@ async def create_link_for_image_transformation(
     current_user: User = Depends(auth_service.get_current_user),
     db: Session = Depends(get_db),
 ):
+    """
+    **The `create_link_for_image_transformation` function creates a link for the image transformation.**
+        **The function takes in an integer `photo_id`, which is the id of the photo to be transformed.**
+        **It also takes in a `current_user` object and db Session object as dependencies.** 
+        **The `create_link_for_image_transformation` function calls another async function called create link transform image, which returns either None or a string containing the url of where to find the transformed image.🏰**
+    ____
+    
+    - **:param**🪄 `photo_id:` `int:` Get the photo id from the url\n
+    - **:param**🪄 `current_user:` `User:` Get the current user from the database\n
+    - **:param**🪄 `db:` `Session:` Access the database\n
+    - **:param**🪄 : Get the photo id from the request\n
+    **:return:**🪄 A dict with the following keys:
+    """
     result = await create_link_transform_image(photo_id, current_user, db)
     if result is None:
         raise HTTPException(

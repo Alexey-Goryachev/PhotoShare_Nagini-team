@@ -14,6 +14,17 @@ security = HTTPBearer()
 #Реєстрація
 @router.post("/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def signup(body: UserModel, db: Session = Depends(get_db)):
+    """
+    **The signup function creates a new user in the database.**
+        **It takes an email and password as input, and returns a `UserResponse` object with the newly created user's information.**
+        **If there is already an account associated with that email address, it will return a `409 Conflict error`.🔮**
+
+    ___
+    
+    - **:param** 🧹 `body:` `UserModel:` Get the user model from the request body
+    - **:param** 🧹 `db:` `Session:` Connect to the database \n
+    **:return:** An object of type userresponse
+    """
     exist_user = await repository_users.get_user_by_email(body.email, db)
     if "@" not in body.email:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid email")
@@ -45,6 +56,15 @@ async def signup(body: UserModel, db: Session = Depends(get_db)):
 #Логін
 @router.post("/login", response_model=TokenModel)
 async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):  # Додайте залежність db
+    """
+    **The login function is used to authenticate a user.**🚂
+
+    ___
+    
+    - **:param**⚡ `body:` OAuth2PasswordRequestForm: Receive the data from the request body\n
+    - **:param**⚡ `db:` `Session:` Pass the database connection to the function\n
+    **:return:** An object of the loginresponse class, which contains a jwt token
+    """
     user = await repository_users.get_user_by_email(body.username, db)
     if user is None:
         raise HTTPException(status_code=400, detail="Invalid email")

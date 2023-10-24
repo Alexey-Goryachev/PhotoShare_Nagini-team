@@ -29,14 +29,14 @@ async def create_comment(photos_id: int,
     """
     The `create_comment function` creates a new comment for the photo with the given id.\n\n
     **The body of the comment is passed in as JSON data, and must contain a `body` field.
-    The user who created this comment will be set to `current_user`.**
+    The user who created this comment will be set to `current_user`.📖**
     ___
 
-    - **:param** `photos_id`: _int_: Specify the post that the comment is being created for\n
-    - **:param** `body`: _CommentBase_: Pass the data from the request body to the function\n
-    - **:param** `db`: _Session_: Pass the database session to the repository layer\n
-    - **:param** `current_user`: _User_: Get the current user\n
-    :return: A comment object, which is then serialized as json
+    - **:param**🪄 `photos_id`: _int_: Specify the post that the comment is being created for\n
+    - **:param**🪄 `body`: _CommentBase_: Pass the data from the request body to the function\n
+    - **:param**🪄 `db`: _Session_: Pass the database session to the repository layer\n
+    - **:param**🪄 `current_user`: _User_: Get the current user\n
+    **:return:** A comment object, which is then serialized as json
     """
     new_comment = await repository_comments.create_comment(photos_id, body, db, current_user)
     return new_comment
@@ -52,15 +52,15 @@ async def edit_comment(comment_id: int,
     The `edit_comment function` allows a user to edit their own comment.\n\n
     **The function takes in the `comment_id`, body and db as parameters.
     It then calls the edit_comment function from `repository_comments` which returns an edited comment object if successful or `None` otherwise.
-    If it is unsuccessful, it raises a 404 error with detail message `COMM_NOT_FOUND`.**
+    If it is unsuccessful, it raises a 404 error with detail message `COMM_NOT_FOUND`.🐍**
 
     ___
 
-    - **:param** `comment_id`: _int_: Identify the comment to be edited\n
-    - **:param** `body`: _CommentBase_: Pass the comment body to the edit_comment function\n
-    - **:param** `db`: _Session_: Get the database session\n
-    - **:param** `current_user`: _User_: Get the user who is currently logged in\n
-    :return: None, but the function expects a CommentBase object\n
+    - **:param**𓆙 `comment_id`: _int_: Identify the comment to be edited\n
+    - **:param**𓆙 `body`: _CommentBase_: Pass the comment body to the edit_comment function\n
+    - **:param**𓆙 `db`: _Session_: Get the database session\n
+    - **:param**𓆙 `current_user`: _User_: Get the user who is currently logged in\n
+    **:return:** None, but the function expects a CommentBase object\n
     """
     edited_comment = await repository_comments.edit_comment(comment_id, body, db, current_user)
     if edited_comment is None:
@@ -76,14 +76,14 @@ async def delete_comment(comment_id: int,
     """
     The `delete_comment function` deletes a comment from the database.\n\n
     **The function takes in an integer representing the id of the comment to be deleted,
-    and returns a dictionary containing information about that comment.**
+    and returns a dictionary containing information about that comment. 🪶**
 
     ___
 
-    - **:param** `comment_id`: _int_: Specify the comment that is to be deleted
-    - **:param** `db`: _Session_: Get the database session from the dependency
-    - **:param** `current_user`: _User_: Check if the user is logged in
-    :return: The deleted comment
+    - **:param**⚡ `comment_id`: _int_: Specify the comment that is to be deleted
+    - **:param**⚡ `db`: _Session_: Get the database session from the dependency
+    - **:param**⚡ `current_user`: _User_: Check if the user is logged in
+    **:return:** The deleted comment
     """
     deleted_comment = await repository_comments.delete_comment(comment_id, db, current_user)
     if deleted_comment is None:
@@ -101,14 +101,14 @@ async def single_comment(comment_id: int,
     **The function takes in an integer representing the id of the comment to be returned,
     and two optional parameters: `db` and `current_user`. If no db is provided, it will use
     `get_db()` to create a new connection with our database. If no current user is provided,
-    it will use auth_service's `get_current_user()` function to retrieve one.
+    it will use auth_service's `get_current_user()` function to retrieve one.🔥
 
     ___
 
-    - **:param** `comment_id`: _int_: Pass the comment id to the function
-    _ **:param** `db`: _Session_: Pass the database session to the function
-    - **:param** `current_user`: _User_: Get the current user from the database
-    :return: The comment object, but i want to return the comment_id
+    - **:param**🪶 `comment_id`: _int_: Pass the comment id to the function
+    - **:param**🪶 `db`: _Session_: Pass the database session to the function
+    - **:param**🪶 `current_user`: _User_: Get the current user from the database
+    **:return:** The comment object, but i want to return the comment_id
     """
     comment = await repository_comments.show_single_comment(comment_id, db, current_user)
     if comment is None:
@@ -127,14 +127,14 @@ async def by_user_comments(user_id: int,
     `db` (_Session_, optional): SQLAlchemy Session. Defaults to Depends(`get_db`).\n
     `current_user` (_User_, optional): User object for the currently logged in user. Defaults to Depends(`auth_service.get_current_user`).\n
     **Returns:**\n
-    _List[Comment]_: A list of Comment objects representing all comments made by a given user.\n
+    _List[Comment]_: A list of Comment objects representing all comments made by a given user.🦉\n
 
     ___
 
-    - **:param** `user_id`: _int_: Specify the `user_id` of the user whose comments we want to see\n
-    - **:param** `db`: _Session_: Pass the database session to the function\n
-    - **:param** `current_user`: _User_: Check if the user is logged in\n
-    :return: A list of comments
+    - **:param**🖋️ `user_id`: _int_: Specify the `user_id` of the user whose comments we want to see\n
+    - **:param**🖋️ `db`: _Session_: Pass the database session to the function\n
+    - **:param**🖋️ `current_user`: _User_: Check if the user is logged in\n
+    **:return:** A list of comments
     """
     comments = await repository_comments.show_user_comments(user_id, db)
     if comments is None:
@@ -153,15 +153,15 @@ async def by_user_photo_comments(user_id: int,
     `user_id` (_int_): The id of the user whose comments are being retrieved.\n
     `post_id` (_int_): The id of the post whose comments are being retrieved.\n
     **Returns:**\n
-    A list containing all comment objects associated with a given user and photo.\n
+    A list containing all comment objects associated with a given user and photo.🐈‍⬛\n
 
     ___
 
-    - **:param** `user_id`: _int_: Specify the `user_id` of the user whose comments we want to retrieve\n
-    - **:param** `photos_id`: _int_: Get the comments for a specific photo\n
-    - **:param** `db`: _Session_: Access the database\n
-    - **:param** `current_user`: _User_: Get the current user who is logged in\n
-    :return: A list of comments that belong to a photo
+    - **:param**🗝️ `user_id`: _int_: Specify the `user_id` of the user whose comments we want to retrieve\n
+    - **:param**🗝️ `photos_id`: _int_: Get the comments for a specific photo\n
+    - **:param**🗝️ `db`: _Session_: Access the database\n
+    - **:param**🗝️ `current_user`: _User_: Get the current user who is logged in\n
+    **:return:** A list of comments that belong to a photo
     """
     comments = await repository_comments.show_user_comments_photo(user_id, photos_id, db)
     if comments is None:
