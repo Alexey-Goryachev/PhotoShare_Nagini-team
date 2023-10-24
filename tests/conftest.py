@@ -19,13 +19,6 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope="module")
 def session():
-    """
-    The session function is a fixture that creates a new database session for each test.
-    It's useful if you have operations that are not committed at the end of the test.
-    This way, you can create data in one test and use it in another, without polluting your development database with useless data.
-    
-    :return: A session object
-    """
     # Створюємо базу даних
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -39,16 +32,6 @@ def session():
 
 @pytest.fixture(scope="module")
 def test_client(session):
-    """
-    The test_client function is a fixture that returns a test client for the Flask app.
-    The test client allows you to make requests to your application from within tests, 
-    and inspect the responses it gives back. The yield keyword means that this function 
-    will return a value (the TestClient) when called, but will also execute any code after 
-    the yield statement before finishing execution.
-    
-    :param session: Pass in the database session to the test client
-    :return: A test client that can be used to make requests to the application
-    """ 
     # Залежності
     def override_get_db():
         try:
@@ -63,11 +46,6 @@ def test_client(session):
 
 @pytest.fixture
 def user_data():
-    """
-    The user_data function returns a dictionary containing the user's username, email address, password and roles.
-    
-    :return: A dictionary with the user's data
-    """
     return {
         "username": "testuser",
         "email": "testuser@example.com",

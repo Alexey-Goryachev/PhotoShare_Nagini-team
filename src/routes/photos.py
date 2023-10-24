@@ -20,7 +20,7 @@ from src.repository import photos as repository_photos
 from src.services.photos import transform_image, create_link_transform_image
 from src.services.auth import auth_service
 
-router = APIRouter(prefix="/photos", tags=["photos"])
+router = APIRouter(tags=["photos"])
 security = HTTPBearer()
 
 

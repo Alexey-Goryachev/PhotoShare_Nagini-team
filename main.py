@@ -20,11 +20,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 # default route for the application
 # app.include_router(auth_router)
-app.include_router(auth_router, prefix='/api')
-app.include_router(photos_router, prefix='/api')
-app.include_router(comment_router, prefix='/api')
-app.include_router(tag_router, prefix='/api')
-app.include_router(user_router, prefix='/api')
+app.include_router(auth_router, prefix='/api/auth')
+app.include_router(photos_router, prefix='/api/photos')
+app.include_router(comment_router, prefix='/api/comments')
+app.include_router(tag_router, prefix='/api/tags')
+app.include_router(user_router, prefix='/api/users')
 
 @app.get("/items/")
 async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
@@ -79,5 +79,5 @@ async def healthchecker(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error connecting to the database")
         
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)

@@ -11,7 +11,7 @@ from src.services.roles import RoleChecker
 from src.database.models import User
 from src.schemas.schemas import Role
 
-router = APIRouter(prefix='/comments', tags=["comments"])
+router = APIRouter(tags=["comments"])
 
 # Set permissions by RoleChecker for current route
 allowed_get_comments = RoleChecker([Role.Administrator, Role.Moderator, Role.User])
