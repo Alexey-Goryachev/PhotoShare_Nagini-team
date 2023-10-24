@@ -47,7 +47,7 @@ class Photo(Base):
     image_transform = Column(String(200), nullable=True)
     qr_transform = Column(String(200), nullable=True)
     public_id = Column(String(100), nullable=True)
-
+    comment = relationship('Comment', backref="photos", cascade="all, delete-orphan")
 
 class Comment(Base):
     __tablename__ = "comments"

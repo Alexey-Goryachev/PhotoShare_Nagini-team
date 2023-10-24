@@ -8,7 +8,7 @@ from src.schemas.schemas import UserModel, UserResponse, TokenModel, UserDb
 from src.repository import users as repository_users
 from src.services.auth import auth_service
 
-router = APIRouter(prefix='/auth', tags=["auth"])
+router = APIRouter(tags=["auth"])
 security = HTTPBearer()
 
 #Реєстрація
@@ -58,43 +58,4 @@ async def login(body: OAuth2PasswordRequestForm = Depends(), db: Session = Depen
 
     # Повертаємо об'єкт відповіді
     return {"access_token": access_token, "token_type": "bearer", "message": "Logged successfully"}
-
-# Бан користувача
-
-@router.post("/ban/{user_id}", response_model=Dict[str, str])
-async def ban_user(
-    user_id: int,
-    current_user: User = Depends(auth_service.get_current_user),
-    db: Session = Depends(get_db),
-):
-    if not current_user or "Administrator" not in current_user.roles.split(","):
-        raise HTTPException(status_code=403, detail="Permission denied")
-
-    user = await repository_users.get_user_by_id(user_id, db)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    user.is_active = False
-    db.commit()
-    db.refresh(user)
-    return {"message": "User banned successfully"}
-
-
-
-# Анбан користувача
-
-@router.delete("/unban/{user_id}", response_model=Dict[str, str])
-async def unban_user(user_id: int, current_user: User = Depends(auth_service.get_current_user), db: Session = Depends(get_db)):
-    if current_user.roles != "Administrator":
-        raise HTTPException(status_code=403, detail="Permission denied")
-
-    user = await repository_users.get_user_by_id(user_id, db)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    user.is_active = True
-    db.commit()
-    db.refresh(user)
-    return {"message": "User unbanned successfully"}
-
 

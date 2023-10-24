@@ -1,11 +1,8 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 from enum import Enum
-from pydantic import BaseModel, EmailStr, Field
-from typing import List
-from enum import Enum
-from pydantic import BaseModel, EmailStr, constr, SecretStr
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, constr, SecretStr
+
 
 
 class TagBase(BaseModel):
@@ -63,6 +60,11 @@ class UserUpdate(BaseModel):
     username: constr(min_length=3, max_length=50)
     password: SecretStr
 
+class AdminUserPatch(BaseModel):
+    email: Optional[EmailStr] = None
+    username: Optional[constr(min_length=3, max_length=50)] = None
+    password: Optional[SecretStr] = None
+    is_active: Optional[bool] = None
 
 
 class TokenModel(BaseModel):
