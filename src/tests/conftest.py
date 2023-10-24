@@ -51,3 +51,13 @@ def user_data():
         "password": "testpassword",
         "roles": ["User"]
     }
+
+@pytest.fixture
+def user_data_test():
+    return {
+        "username": "GG@example.com",
+        "email": "GG@example.com",
+        "password": "Ronald80",
+        "roles": ["User"],
+        "is_active": True
+    }
