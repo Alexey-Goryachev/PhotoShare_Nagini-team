@@ -15,7 +15,7 @@
 ## About ✨
 
 #### PhotoShare 
-PhotoShare is a web application that allows users to create an account, upload posts with photos, use tags and leave comments. The application is built using the FastAPI framework and uses SQLAlchemy as the database ORM.
+PhotoShare is a RestAPI for web application that allows users to create an account, upload posts with photos, use tags and leave comments. The application is built using the FastAPI framework and uses SQLAlchemy as the database ORM.
 
 ## Deployment
 - [Live PhotoShare](https://nagini-team-photoshare-alex-goryachev.koyeb.app/docs)
