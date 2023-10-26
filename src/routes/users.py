@@ -114,14 +114,14 @@ async def patch_user_profile(
     db: Session = Depends(get_db),
 ):
     """
-    The patch_user_profile function allows you to change the user's profile information.
+    **The patch_user_profile function allows you to change the user's profile information.🔮**
     
-    :param user_id: int: Get the user id from the path
-    :param user_update: AdminUserPatch: Pass the data that the user wants to change
-    :param current_user: UserDb: Get the current user
-    :param db: Session: Pass the database session to the function
-    :param : Get the user id
-    :return: A dictionary with a message
+    - **:param**✉ `user_id:` `int:` Get the user id from the path
+    - **:param**✉ `user_update:` AdminUserPatch: Pass the data that the user wants to change
+    - **:param**✉ `current_user:` UserDb: Get the current user
+    - **:param**✉ `db:` `Session:` Pass the database session to the function
+    - **:param**✉ : Get the user id
+    **:return:**✉ A dictionary with a message
     """
     if not current_user or "Administrator" not in current_user.roles.split(","):
         raise HTTPException(status_code=403, detail="Permission denied")
