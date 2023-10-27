@@ -34,7 +34,7 @@ To run this project, follow these steps:
 
 
 ## Usage 💠
-This project exposes 20+ endpoints through a REST API. To access these APIs, use any API client, such as Postman or cURL. The API documentation can be found at [documentation](https://github.com/Alexey-Goryachev/PhotoShare_Nagini-team).
+This project exposes 20+ endpoints through a REST API. To access these APIs, use any API client, such as Postman or cURL. The API documentation can be found at [documentation](https://alexey-goryachev.github.io/PhotoShare_Nagini-team/).
 
 
 ## Developers :octocat:
