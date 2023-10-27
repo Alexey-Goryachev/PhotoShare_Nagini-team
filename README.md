@@ -21,7 +21,7 @@ PhotoShare is a RestAPI for web application that allows users to create an accou
 - [Live PhotoShare](https://nagini-team-photoshare-alex-goryachev.koyeb.app/docs)
 
 ## Documentation 📗
- - [Documentation link](https://github.com/Alexey-Goryachev/PhotoShare_Nagini-team)
+ - [Documentation link](https://alexey-goryachev.github.io/PhotoShare_Nagini-team/index.html)
 
 
 ## Installation 💻
