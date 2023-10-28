@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from starlette import status
 
-from tests.conftest import test_client , user_data
+from conftest import test_client , user_data
 import logging
 from src.database import db
 from src.database.db import get_db
